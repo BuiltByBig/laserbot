@@ -1,0 +1,44 @@
+{
+  "name": "cnc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "webpack --colors",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack-dev-server --hot"
+  },
+  "author": "Dana Woodman <dana@danawoodman.com> (http://danawoodman.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "babel": "6.3.26",
+    "babel-cli": "6.3.17",
+    "babel-plugin-transform-async-to-generator": "6.3.13",
+    "babel-preset-es2015": "6.3.13",
+    "babel-preset-react": "6.3.13",
+    "bootstrap": "git+https://github.com/twbs/bootstrap.git#v4.0.0-alpha.2",
+    "debug": "2.2.0",
+    "font-awesome": "4.5.0",
+    "react": "0.14.3",
+    "react-dom": "0.14.3",
+    "socket.io": "1.3.7"
+  },
+  "devDependencies": {
+    "autoprefixer-loader": "3.1.0",
+    "babel-loader": "6.2.0",
+    "css-loader": "0.23.1",
+    "exports-loader": "0.6.2",
+    "extract-text-webpack-plugin": "0.9.1",
+    "file-loader": "0.8.5",
+    "html-webpack-plugin": "1.7.0",
+    "imports-loader": "0.6.5",
+    "node-sass": "3.4.2",
+    "sass-loader": "3.1.2",
+    "style-loader": "0.13.0",
+    "webpack": "1.12.9",
+    "webpack-dev-server": "1.14.0"
+  }
+}
