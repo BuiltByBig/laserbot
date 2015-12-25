@@ -1,6 +1,19 @@
+import Application from './containers/application'
+//import configureStore from './store/configure-store'
 import React from 'react'
-import ReactDOM from 'react-dom'
-import Application from './components/application'
+import reducers from './reducers'
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import { render } from 'react-dom'
 import './styles/index.scss'
 
-ReactDOM.render(<Application />, document.getElementById('app'))
+//const store = configureStore()
+const store = createStore(reducers)
+const root = document.getElementById('app')
+
+render(
+  <Provider store={store}>
+    <Application />
+  </Provider>,
+  root
+)

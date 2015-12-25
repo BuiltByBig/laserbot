@@ -1,3 +1,5 @@
+import Card from './card'
+import FA from 'react-fontawesome'
 import React from 'react'
 
 export default React.createClass({
@@ -6,12 +8,34 @@ export default React.createClass({
 
   propTypes: {
     commands: React.PropTypes.array,
+    sendCommand: React.PropTypes.func.isRequired,
+    visible: React.PropTypes.bool,
   },
 
   getDefaultProps() {
     return {
       commands: [],
+      visible: true,
     }
+  },
+
+  getInitialState() {
+    return {
+      disabled: true,
+    }
+  },
+
+  _handleChange(e) {
+    this.setState({ disabled: !this.refs.gcode.value })
+  },
+
+  _handleSubmit(e) {
+    e.preventDefault()
+    const node = this.refs.gcode
+    const val = node.value.trim()
+    console.log('form submitted', val)
+    this.props.sendCommand(val)
+    node.value = ''
   },
 
   render() {
@@ -20,7 +44,7 @@ export default React.createClass({
     if (this.props.commands.length) {
       const list = this.props.commands.map((command, index) => {
         return (
-          <li key={index}>{command}</li>
+          <li key={index}>{command.command}</li>
         )
       })
 
@@ -34,27 +58,32 @@ export default React.createClass({
     }
 
     return (
-      <div className='card'>
-        <div className="card-header">Console</div>
+      <Card title='Console'>
         <div className='card-block'>
-          <div className='card-text'>
-            {commands}
-          </div>
-
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            console.log('form submitted')
-          }}>
+          {commands}
+          <form onSubmit={this._handleSubmit}>
             <div className='input-group'>
-              <input type='text' className='form-control' placeholder='Enter GCode...' />
+              <input
+                className='form-control'
+                onChange={this._handleChange}
+                placeholder='Enter GCode...'
+                ref='gcode'
+                type='text'
+              />
               <span className='input-group-btn'>
-                <button className='btn btn-secondary' type='button'>Run</button>
+                <button
+                  className='btn btn-secondary'
+                  disabled={this.state.disabled}
+                  onClick={this._handleSubmit}
+                  type='submit'
+                >
+                  Run
+                </button>
               </span>
             </div>
           </form>
-
         </div>
-      </div>
+      </Card>
     )
   },
 
