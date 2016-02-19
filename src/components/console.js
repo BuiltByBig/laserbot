@@ -36,6 +36,7 @@ export default React.createClass({
     console.log('form submitted', val)
     this.props.sendCommand(val)
     node.value = ''
+    // TODO: set state here instead
   },
 
   render() {

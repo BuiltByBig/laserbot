@@ -6,15 +6,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const isProduction = process.env.NODE_ENV === 'production' || false
 
 module.exports = {
-  debug: !isProduction,
   cache: !isProduction,
+  debug: !isProduction,
   devtool: !isProduction ? 'eval' : null,
   entry: {
     bundle: [ './src/index.js' ],
   },
   output: {
-    path: path.join(__dirname, 'public'),
     filename: '[name].js',
+    path: path.join(__dirname, 'public'),
+    publicPath: '/',
     //filename: isProduction ? '[name].[hash].js' : '[name].js',
   },
   plugins: [

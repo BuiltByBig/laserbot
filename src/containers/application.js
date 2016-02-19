@@ -1,82 +1,153 @@
+import Control from '../components/control'
+import Console from '../components/console'
+import Devices from '../components/devices'
+import JogControls from '../components/jog-controls'
+import JogDistanceSelector from '../components/jog-distance-selector'
+import UnitSelector from '../components/unit-selector'
+import MachineCoordinates from '../components/machine-coordinates'
+import Device from '../typedefs'
+import React, { PropTypes } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { sendCommand } from '../actions/commands'
-import { addDevice } from '../actions/devices'
-import Console from '../components/console'
-import Devices from '../components/devices'
-import io from 'socket.io-client'
-import React from 'react'
+import { fetchDevices } from '../actions/devices'
 
-/**
- * TODO:
- *
- * - Edit grbl shield settings
- *
- * Keyboard shortcuts:
- * - left/right=x
- * - up/down=y
- * - page up/down=z
- * - spacebar=feedhold
- * - esc=stop
- */
-
-const socket = new WebSocket('ws://localhost:8989/ws')
+//const socket = new WebSocket('ws://localhost:8989/ws')
 
 const Application =  React.createClass({
 
   name: 'Application',
 
   propTypes: {
-    commands: React.PropTypes.array,
-    devices: React.PropTypes.array,
+    commands: PropTypes.array,
+    devices: PropTypes.shape({
+      isFetching: PropTypes.boolean,
+      didInvalidate: PropTypes.boolean,
+      lastUpdated: PropTypes.instanceOf(Date),
+      item: PropTypes.arrayOf(Device),
+    }),
+    fetchDevices: PropTypes.func.isRequired,
+    sendCommand: PropTypes.func.isRequired,
   },
 
-  getDefaultProps() {
+  getInitialState() {
     return {
-      commands: [],
-      devices: [],
+      stepDistance: 1.0,
+      displayUnits: 'mm',
+      x: 0,
+      y: 0,
+      z: 0,
     }
   },
 
-  componentWillMount() {
-    const { dispatch } = this.props
+  changeUnits(displayUnits) {
+    this.setState({ displayUnits })
+  },
 
-    socket.onopen = (e) => {
-      socket.send('list', (data) => {
-        console.log('data', data)
-      })
+  homeX() {
+    this.setState({ x: 0 })
+  },
 
-      console.log('connection established with serial-port-json-server')
+  homeY() {
+    this.setState({ y: 0 })
+  },
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
+  homeZ() {
+    this.setState({ z: 0 })
+  },
 
-        console.log('event', data)
+  goHome() {
+    this.setState({ x: 0, y: 0, z: 0 })
+  },
 
-        if (data.SerialPorts && data.SerialPorts.length) {
-          console.log('found devices', data.SerialPorts)
-          data.SerialPorts.forEach((device) => {
-            console.log('add device', device)
-            dispatch(addDevice(device))
-          })
-        }
-      }
+  setStepDistance(distance) {
+    this.setState({ stepDistance: distance })
+  },
+
+  stepX(distance) {
+    this.setState({ x: this.state.x + distance })
+  },
+
+  stepY(distance) {
+    this.setState({ y: this.state.y + distance })
+  },
+
+  stepZ(distance) {
+    this.setState({ z: this.state.z + distance })
+  },
+
+  generateDisplayUnit(value) {
+    if (this.state.displayUnits === 'in') {
+      return value / 25.4
     }
+
+    return value
   },
 
   render() {
-    const { dispatch } = this.props
+    const { commands, devices, fetchDevice, sendCommand } = this.props
+    const { stepDistance, displayUnits, x, y, z } = this.state
+    const displayX = this.generateDisplayUnit(x)
+    const displayY = this.generateDisplayUnit(y)
+    const displayZ = this.generateDisplayUnit(z)
+
     return (
-      <div className='container'>
-        <Console
-          commands={this.props.commands}
-          sendCommand={(command) => {
-            dispatch(sendCommand(command))
-          }}
-        />
-        <Devices
-          devices={this.props.devices}
-        />
+      <div>
+        <div className='navbar navbar-light bg-faded m-b-3'>
+          <a href='/' className='navbar-brand'>CNC</a>
+        </div>
+
+        <div className='container'>
+          <div className='row m-b-3'>
+            <div className='col-sm-7'>
+              <JogControls
+                goHome={this.goHome}
+                stepDistance={this.generateDisplayUnit(stepDistance)}
+                stepX={this.stepX}
+                stepY={this.stepY}
+                stepZ={this.stepZ}
+              />
+            </div>
+            <div className='col-sm-5'>
+              <MachineCoordinates
+                homeX={this.homeX}
+                homeY={this.homeY}
+                homeZ={this.homeZ}
+                displayUnits={displayUnits}
+                x={displayX}
+                y={displayY}
+                z={displayZ}
+              />
+              <div className='m-t-1'>
+                <JogDistanceSelector
+                  setStepDistance={this.setStepDistance}
+                  stepDistance={this.generateDisplayUnit(stepDistance)}
+                  displayUnits={displayUnits}
+                />
+              </div>
+              <div className='m-t-1'>
+                <UnitSelector
+                  changeUnits={this.changeUnits}
+                  displayUnits={displayUnits}
+                />
+              </div>
+            </div>
+          </div>
+          <Control
+            sendCommand={sendCommand}
+          />
+          <Console
+            commands={commands}
+            sendCommand={sendCommand}
+          />
+          <Devices
+            didInvalidate={devices.didInvalidate}
+            fetchDevices={fetchDevices}
+            isFetching={devices.isFetching}
+            items={devices.items}
+            lastUpdated={devices.lastUpdated}
+          />
+        </div>
       </div>
     )
   },
@@ -90,4 +161,4 @@ function select(state) {
   }
 }
 
-export default connect(select)(Application)
+export default connect(select, { fetchDevices, sendCommand })(Application)
