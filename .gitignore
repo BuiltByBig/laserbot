@@ -30,4 +30,7 @@ node_modules
 .env
 
 # Project specific
-public/bundle*
+public/*
+!public/index.html
+!public/app.js
+!public/app.css

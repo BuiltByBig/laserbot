@@ -9,6 +9,7 @@
   "scripts": {
     "build": "webpack --colors",
     "play": "nodemon --exec babel-node test.js",
+    "start": "nodemon --exec babel-node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack-dev-server --inline --hot --content-base src"
   },
@@ -25,6 +26,7 @@
     "bootstrap": "git+https://github.com/twbs/bootstrap.git#v4.0.0-alpha.2",
     "font-awesome": "4.5.0",
     "install": "0.4.1",
+    "jade": "1.11.0",
     "keymaster": "1.6.2",
     "lodash": "3.10.1",
     "nodemon": "1.8.1",
@@ -37,7 +39,8 @@
     "redux": "3.0.5",
     "redux-logger": "2.3.1",
     "redux-thunk": "1.0.2",
-    "serialport": "2.0.5"
+    "serialport": "2.0.5",
+    "socket.io": "1.4.5"
   },
   "devDependencies": {
     "autoprefixer-loader": "3.1.0",

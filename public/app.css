@@ -1,0 +1,48 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 2rem;
+}
+
+h1 {
+  margin: 0 0 1.5rem 0;
+}
+
+#ports,
+#messages {
+  background: #efefef;
+  font-family: monospace;
+  margin: 2rem 0;
+  /*max-height: 30rem;*/
+  overflow: auto;
+  padding: 1rem 2rem;
+}
+
+#messages p {
+  margin: 0 0 0.5rem 0;
+}
+
+#form {
+  margin-bottom: 2rem;
+}
+
+#input {
+  display: block;
+  font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+  padding: 1rem;
+  width: 100%;
+}
+
+#form button {
+  background: mediumaquamarine;
+  border: 0 none;
+  color: white;
+  font-size: 1.4rem;
+  padding: 1rem 2.5rem;
+}
