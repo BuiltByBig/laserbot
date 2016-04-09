@@ -250,7 +250,7 @@ export default React.createClass({
   _stop() {
     console.log('stop')
     this.setState({ status: 'idle' })
-    this._sendCommand('M2; stop machine', (err) => {
+    this._sendCommand('M2 ~ ; stop machine and reset hold', (err) => {
       console.log('stop received')
     })
   },
