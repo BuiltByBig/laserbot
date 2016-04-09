@@ -305,13 +305,13 @@ export default React.createClass({
   _zeroX() {
     console.log('zeroX')
     this.setState({ x: 0 })
-    this._sendCommand('G10 P0 X0')
+    this._sendCommand('G92 X0')
   },
 
   _zeroY() {
     console.log('zeroY')
     this.setState({ y: 0 })
-    this._sendCommand('G10 P0 Y0')
+    this._sendCommand('G92 Y0')
   },
 
   render() {
