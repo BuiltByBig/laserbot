@@ -421,6 +421,7 @@ export default React.createClass({
                 jogYNegative={this._jogYNegative}
                 jogYPositive={this._jogYPositive}
                 shortcutsEnabled={shortcutsEnabled}
+                status={status}
               />
             </div>
             <div className='m-b-2'>
@@ -428,6 +429,7 @@ export default React.createClass({
                 displayUnits='mm'
                 homeX={this._homeX}
                 homeY={this._homeY}
+                status={status}
                 x={x}
                 y={y}
                 zeroX={this._zeroX}
