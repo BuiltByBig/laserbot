@@ -30,7 +30,7 @@ export default React.createClass({
       ],
       shortcutsEnabled: true,
       startupBlocks: [
-        'G91', // set relative coordinate system
+        //'G91', // set relative coordinate system
       ],
       status: 'idle',
       stripOkStatusMessages: true,
@@ -219,29 +219,44 @@ export default React.createClass({
 
   _homeAll() {
     console.log('homeAll')
-    this._sendCommand('$H', (err) => {
+    // $H if home switches are enabled, otherwise 'G91 G0 X0 Y0 Z0'
+    this._sendCommand('G90 G0 X0 Y0 Z0', (err) => {
       if (err) {
         throw err
       }
 
       console.log('homing success')
+      this.setState({ x: 0, y: 0 })
     })
-    this.setState({ x: 0, y: 0 })
   },
 
   _homeX() {
     console.log('homeX')
-    this.setState({ x: 0 })
+    this._sendCommand('G90 G0 X0', (err) => {
+      if (err) {
+        throw err
+      }
+
+      console.log('homeX success')
+      this.setState({ x: 0 })
+    })
   },
 
   _homeY() {
     console.log('homeY')
-    this.setState({ y: 0 })
+    this._sendCommand('G90 G0 Y0', (err) => {
+      if (err) {
+        throw err
+      }
+
+      console.log('homeY success')
+      this.setState({ y: 0 })
+    })
   },
 
   _jogXNegative() {
     console.log('jogXNegative')
-    this._sendCommand(`G0 X-${this.state.jogDistance}`, (err) => {
+    this._sendCommand(`G91 G0 X-${this.state.jogDistance}`, (err) => {
       if (err) {
         throw err
       }
@@ -253,7 +268,7 @@ export default React.createClass({
 
   _jogXPositive() {
     console.log('jogXPositive')
-    this._sendCommand(`G0 X${this.state.jogDistance}`, (err) => {
+    this._sendCommand(`G91 G0 X${this.state.jogDistance}`, (err) => {
       if (err) {
         throw err
       }
@@ -265,7 +280,7 @@ export default React.createClass({
 
   _jogYNegative() {
     console.log('jogYNegative')
-    this._sendCommand(`G0 Y-${this.state.jogDistance}`, (err) => {
+    this._sendCommand(`G91 G0 Y-${this.state.jogDistance}`, (err) => {
       if (err) {
         throw err
       }
@@ -277,7 +292,7 @@ export default React.createClass({
 
   _jogYPositive() {
     console.log('jogYPositive')
-    this._sendCommand(`G0 Y${this.state.jogDistance}`, (err) => {
+    this._sendCommand(`G91 G0 Y${this.state.jogDistance}`, (err) => {
       if (err) {
         throw err
       }
@@ -290,11 +305,13 @@ export default React.createClass({
   _zeroX() {
     console.log('zeroX')
     this.setState({ x: 0 })
+    this._sendCommand('G10 P0 X0')
   },
 
   _zeroY() {
     console.log('zeroY')
     this.setState({ y: 0 })
+    this._sendCommand('G10 P0 Y0')
   },
 
   render() {
