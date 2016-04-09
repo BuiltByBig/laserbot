@@ -34,13 +34,32 @@ body {
 }
 
 .file-panel {
-  width: $file-panel-width;
+  flex: 0;
+  min-width: 18rem;
+  /*max-width: 24rem;*/
 }
 
 .preview-pane {
-  flex: 1;
+  flex: 7;
 }
 
 .control-panel {
-  width: $control-panel-width;
+  flex: 3;
+  min-width: 28rem;
+  /*max-width: 38rem;*/
+}
+
+@media (max-width: map-get($grid-breakpoints, md)) {
+
+  // Change layout to be horizontal and scrolling
+  #app,
+  .app-container,
+  .page,
+  .file-panel,
+  .preview-pane,
+  .control-panel {
+    display: block;
+    flex: none;
+    flex-direction: column;
+  }
 }
