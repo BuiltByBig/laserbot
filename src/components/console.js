@@ -75,6 +75,7 @@ export default React.createClass({
       )
     }
 
+    // TODO: add arrow up navigation of history
     return (
       <div>
         <div

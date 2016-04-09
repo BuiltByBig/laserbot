@@ -1,5 +1,3 @@
-import Console from '../components/console'
-import Devices from '../components/devices'
 import FileInput from '../components/file-input'
 import FileList from '../components/file-list'
 import JoggingControl from '../components/jogging-control'
@@ -7,7 +5,7 @@ import io from 'socket.io-client'
 import MachineCoordinates from '../components/machine-coordinates'
 import Navigation from '../components/navigation'
 import PlayPauseButton from '../components/play-pause-button'
-import Preview from '../components/preview'
+import PreviewPane from '../components/preview-pane'
 import React, { PropTypes } from 'react'
 
 export default React.createClass({
@@ -20,7 +18,14 @@ export default React.createClass({
       connectedToWebsockets: false,
       commands: [],
       devices: [],
+      //enableZ: false, // TODO: allow showing Z if desired
       files: [],
+      grblConfig: {
+        '$100': 250,
+        '$101': 250,
+        '$110': 500,
+        '$111': 500,
+      },
       jogDistance: 1,
       logs: [],
       notifications: [
@@ -29,6 +34,7 @@ export default React.createClass({
         },
       ],
       shortcutsEnabled: true,
+      settingsVisible: false,
       startupBlocks: [
         //'G91', // set relative coordinate system
       ],
@@ -112,6 +118,21 @@ export default React.createClass({
       this._logCommand('user', cmd)
       cb && cb()
     })
+  },
+
+  async _sendCommands(cmds, cb) {
+    console.log('send commands', cmds)
+    for (let cmd of cmds) {
+      console.log('cmd', cmd)
+      await new Promise((resolve, reject) => {
+        this._sendCommand(cmd, (err) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve()
+        })
+      })
+    }
   },
 
   _logCommand(type, content) {
@@ -207,6 +228,13 @@ export default React.createClass({
     // Run serially so the buffer doesn't overflow on
     // grbl
     for (let line of lines) {
+
+      // Skip blank lines
+      if (!line) {
+        continue
+      }
+
+      // TODO: need to find a way to pause commands if a feedhold is fired
       await new Promise((resolve, reject) => {
         this._sendCommand(line, (err) => {
           if (err) {
@@ -352,6 +380,20 @@ export default React.createClass({
     this._sendCommand('G92 Y0')
   },
 
+  async _updateConfig(config) {
+    const cmds = _.map(config, (val, key) => `${key}=${Number(val)}`)
+    await this._sendCommands(cmds)
+    this.setState({ grblConfig: config })
+  },
+
+  _hideSettings() {
+    this.setState({ settingsVisible: false })
+  },
+
+  _showSettings() {
+    this.setState({ settingsVisible: true })
+  },
+
   render() {
     const {
       commands,
@@ -359,9 +401,11 @@ export default React.createClass({
       connectedToWebsockets,
       devices,
       files,
+      grblConfig,
       logs,
       notifications,
       shortcutsEnabled,
+      settingsVisible,
       status,
       supportedFileExtensions,
       x,
@@ -378,7 +422,10 @@ export default React.createClass({
           connectedToWebsockets={connectedToWebsockets}
           disconnectFromDevice={this._disconnectFromDevice}
           dismissNotification={this._dismissNotification}
+          hideSettings={this._hideSettings}
           notifications={notifications}
+          showSettings={this._showSettings}
+          settingsVisible={settingsVisible}
         />
         <div className='page'>
           <div className='file-panel bg-inverse'>
@@ -400,27 +447,18 @@ export default React.createClass({
             />
           </div>
           <div className='preview-pane'>
-            {
-              connectedDevice ?
-                <div>
-                  <h4>Preview</h4>
-                  <Preview />
-                  <h4 className='m-t-2'>Commands</h4>
-                  <Console
-                    commands={commands}
-                    sendCommand={this._sendCommand}
-                  />
-                </div> :
-                <div>
-                  <h3>Devices</h3>
-                  <Devices
-                    connectToDevice={this._connectToDevice}
-                    devices={devices}
-                    disconnectFromDevice={this._disconnectFromDevice}
-                    fetchDevices={this._fetchDevices}
-                  />
-                </div>
-            }
+            <PreviewPane
+              connectToDevice={this._connectToDevice}
+              connectedToDevice={connectedToDevice}
+              commands={commands}
+              devices={devices}
+              disconnectFromDevice={this._disconnectFromDevice}
+              hideSettings={this._hideSettings}
+              machineConfig={grblConfig}
+              sendCommand={this._sendCommand}
+              settingsVisible={settingsVisible}
+              updateConfig={this._updateConfig}
+            />
           </div>
           <div className='control-panel'>
             <div className='m-b-2'>

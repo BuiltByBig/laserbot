@@ -32,9 +32,9 @@ export default React.createClass({
     } = this.props
 
     return (
-      <ul>
+      <ul className='list-group'>
         {files.map((file, index) =>
-          <li key={index}>
+          <li className='list-group-item' key={index}>
             <a
               className='pull-sm-right'
               href=''

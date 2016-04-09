@@ -12,7 +12,10 @@ export default React.createClass({
     connectedToWebsockets: PropTypes.bool.isRequired,
     disconnectFromDevice: PropTypes.func.isRequired,
     dismissNotification: PropTypes.func.isRequired,
+    hideSettings: PropTypes.func.isRequired,
     notifications: PropTypes.array.isRequired,
+    showSettings: PropTypes.func.isRequired,
+    settingsVisible: PropTypes.bool.isRequired,
   },
 
   render() {
@@ -21,7 +24,10 @@ export default React.createClass({
       connectedToWebsockets,
       disconnectFromDevice,
       dismissNotification,
+      hideSettings,
       notifications,
+      settingsVisible,
+      showSettings,
     } = this.props
 
     let connection
@@ -65,6 +71,15 @@ export default React.createClass({
                 />
             }
           </h1>
+          <button
+            className='btn btn-primary btn-sm pull-sm-right m-r-2'
+            onClick={settingsVisible ? hideSettings : showSettings}
+          >
+            <FA
+              name='cog'
+              title='Disconnected from Websocket server'
+            />
+          </button>
           {connection}
           <div className='navigation-notifications'>
             <NotificationBar
