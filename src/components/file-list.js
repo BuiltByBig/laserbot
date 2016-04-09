@@ -6,6 +6,7 @@ export default React.createClass({
 
   propTypes: {
     files: PropTypes.array, // arrayOf({ name... })
+    loadFile: PropTypes.func.isRequired,
     removeFile: PropTypes.func.isRequired,
   },
 
@@ -18,6 +19,11 @@ export default React.createClass({
   _removeFile(e, index) {
     e.preventDefault()
     this.props.removeFile(index)
+  },
+
+  _loadFile(e, index) {
+    e.preventDefault()
+    this.props.loadFile(index)
   },
 
   render() {
@@ -36,7 +42,12 @@ export default React.createClass({
             >
               X
             </a>
-            {file.name}
+            <a
+              href=''
+              onClick={(e) => this._loadFile(e, index)}
+            >
+              {file.name}
+            </a>
           </li>
         )}
       </ul>

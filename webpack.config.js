@@ -11,6 +11,7 @@ module.exports = {
   devtool: !isProduction ? 'eval' : null,
   entry: {
     bundle: [
+      'babel-polyfill',
       './src/index.js',
     ],
   },

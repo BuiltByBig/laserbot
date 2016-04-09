@@ -147,7 +147,7 @@ export default React.createClass({
     reader.onloadend = () => {
       console.log('end')
     }
-    reader.readAsDataURL(file)
+    reader.readAsText(file)
   },
 
   _fetchDevices() {
@@ -194,6 +194,28 @@ export default React.createClass({
   _removeFile(index) {
     this.state.files.splice(index, 1)
     this.setState(this.state)
+  },
+
+  async _loadFile(index) {
+    const file = this.state.files[index]
+    console.log('load file', index)
+    console.log(file)
+    const lines = file.content.split('\n')
+
+    this.setState({ status: 'run' })
+
+    // Run serially so the buffer doesn't overflow on
+    // grbl
+    for (let line of lines) {
+      await new Promise((resolve, reject) => {
+        this._sendCommand(line, (err) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve()
+        })
+      })
+    }
   },
 
   _dismissNotification(index) {
@@ -355,6 +377,7 @@ export default React.createClass({
             </p>
             <FileList
               files={files}
+              loadFile={this._loadFile}
               removeFile={this._removeFile}
             />
           </div>
