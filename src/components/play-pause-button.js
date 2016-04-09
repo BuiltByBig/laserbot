@@ -24,9 +24,9 @@ export default React.createClass({
   componentWillMount() {
     key('space', (e) => {
       e.preventDefault()
-      const status = this.state.status
+      const status = this.props.status
       if (status === 'hold' || status === 'idle') {
-        this.props.resume()
+        this.props.play()
       } else if (status === 'run'){
         this.props.pause()
       }
@@ -64,6 +64,7 @@ export default React.createClass({
         className={className}
         disabled={!enabled}
         onClick={action}
+        title={`${label} (shortcut: space bar)`}
       >
         <FA name={icon} className='p-r-1' />
         {' '}

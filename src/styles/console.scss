@@ -1,0 +1,27 @@
+@import '~bootstrap/scss/bootstrap.scss';
+
+.console-container {
+  max-height: 300px;
+  overflow-x: scroll;
+
+  ul {
+    background: #efefef;
+    font-family: monospace;
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+    padding: 1rem 1.75rem;
+
+    li {
+      margin: .25rem 0;
+
+      // Command type styling
+      &.user-command {
+        color: $brand-info;
+      }
+
+      &.system-command {
+        color: $brand-primary;
+      }
+    }
+  }
+}

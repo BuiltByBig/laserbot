@@ -24,6 +24,7 @@
     "babel-preset-react": "6.3.13",
     "bluebird": "3.1.1",
     "bootstrap": "git+https://github.com/twbs/bootstrap.git#v4.0.0-alpha.2",
+    "capitalize": "1.0.0",
     "font-awesome": "4.5.0",
     "keymaster": "1.6.2",
     "lodash": "3.10.1",

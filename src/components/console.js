@@ -1,6 +1,8 @@
+import capitalize from 'capitalize'
 import Card from './card'
 import FA from 'react-fontawesome'
 import React from 'react'
+import '../styles/console.scss'
 
 export default React.createClass({
 
@@ -15,6 +17,16 @@ export default React.createClass({
     return {
       disabled: true,
     }
+  },
+
+  componentDidUpdate(prevProps) {
+    // Check if new message was added, for example:
+    //if (this.props.commands.length === prevProps.commands.length + 1) {
+      console.log('scroll to bottom')
+      const elm = this.refs.container
+      elm.scrollTop = elm.scrollHeight
+      //textarea.scrollTop = textarea.scrollHeight
+    //}
   },
 
   _handleChange(e) {
@@ -37,8 +49,20 @@ export default React.createClass({
     let commands
     if (this.props.commands.length) {
       const list = this.props.commands.map((command, index) => {
+        const icon = command.type === 'user' ? 'user' : 'desktop'
         return (
-          <li key={index}>{command}</li>
+          <li
+            className={`${command.type}-command`}
+            key={index}
+          >
+            <FA
+              className='p-r-3'
+              fixedWidth
+              name={icon}
+              title={`${capitalize(command.type)} command`}
+            />
+            {command.content}
+          </li>
         )
       })
 
@@ -53,7 +77,12 @@ export default React.createClass({
 
     return (
       <div>
-        {commands}
+        <div
+          className='console-container'
+          ref='container'
+        >
+          {commands}
+        </div>
         <form onSubmit={this._handleSubmit}>
           <div className='input-group'>
             <input

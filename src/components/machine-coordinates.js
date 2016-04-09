@@ -1,6 +1,6 @@
 import FA from 'react-fontawesome'
 import numeral from 'numeral'
-import React from 'react'
+import React, { PropTypes } from 'react'
 import '../styles/machine-coordinates.scss'
 
 export default React.createClass({
@@ -8,11 +8,13 @@ export default React.createClass({
   name: 'MachineCoordinates',
 
   propTypes: {
-    homeX: React.PropTypes.func.isRequired,
-    homeY: React.PropTypes.func.isRequired,
-    displayUnits: React.PropTypes.oneOf(['mm', 'in']).isRequired,
-    x: React.PropTypes.number.isRequired,
-    y: React.PropTypes.number.isRequired,
+    homeX: PropTypes.func.isRequired,
+    homeY: PropTypes.func.isRequired,
+    displayUnits: PropTypes.oneOf(['mm', 'in']).isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+    zeroX: PropTypes.func.isRequired,
+    zeroY: PropTypes.func.isRequired,
   },
 
   _homeX(e) {
@@ -23,6 +25,16 @@ export default React.createClass({
   _homeY(e) {
     e.preventDefault()
     this.props.homeY()
+  },
+
+  _zeroX(e) {
+    e.preventDefault()
+    this.props.zeroX()
+  },
+
+  _zeroY(e) {
+    e.preventDefault()
+    this.props.zeroY()
   },
 
   render() {
@@ -49,9 +61,15 @@ export default React.createClass({
           <div className='coordinate-actions'>
             <button
               className='btn btn-secondary'
+              onClick={this._zeroX}
+            >
+              <FA name='ban' title='Zero X axis' />
+            </button>
+            <button
+              className='btn btn-secondary'
               onClick={this._homeX}
             >
-              <FA name='home' />
+              <FA name='home' title='Home X axis' />
             </button>
           </div>
         </div>
@@ -70,9 +88,15 @@ export default React.createClass({
           <div className='coordinate-actions'>
             <button
               className='btn btn-secondary'
+              onClick={this._zeroY}
+            >
+              <FA name='ban' title='Zero Y axis' />
+            </button>
+            <button
+              className='btn btn-secondary'
               onClick={this._homeY}
             >
-              <FA name='home' />
+              <FA name='home' title='Home Y axis' />
             </button>
           </div>
         </div>
