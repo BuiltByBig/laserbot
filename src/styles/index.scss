@@ -1,6 +1,9 @@
 @import 'variables'; // Includes bootstrap overrides
 @import '~bootstrap/scss/bootstrap.scss';
 @import '~font-awesome/scss/font-awesome.scss';
+@import 'layout';
+@import 'typography';
+@import 'file-upload';
 
 body {
   /*margin-top: 3rem;*/
@@ -10,4 +13,16 @@ body {
   border-radius: 1rem;
   font-size: 0.8rem;
   padding: 0.2rem 0.5rem;
+}
+
+.timeline {
+  background: #efefef;
+  font-family: monospace;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+  padding: 1rem 1.75rem;
+
+  li {
+    margin: .25rem 0;
+  }
 }

@@ -1,0 +1,27 @@
+.page {
+  display: flex;
+}
+
+.file-panel,
+.preview-pane,
+.control-panel {
+  padding: 2rem;
+}
+
+.file-panel,
+.control-panel {
+  background: $panel-background;
+  color: #999;
+}
+
+.file-panel {
+  width: $file-panel-width;
+}
+
+.preview-pane {
+  flex: 1;
+}
+
+.control-panel {
+  width: $control-panel-width;
+}

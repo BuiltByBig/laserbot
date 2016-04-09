@@ -1,0 +1,41 @@
+.coordinate-row {
+  display: flex;
+
+  .coordinate-label {
+    align-items: center;
+    background: white;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    width: 3rem;
+
+    div {
+      font-weight: bold;
+      line-height: 1;
+    }
+  }
+
+  .coordinate-input {
+    align-items: 'stretch';
+    background: white;
+    display: flex;
+    flex: 1;
+
+    input {
+      border: 0 none;
+      flex: 1;
+      font-size: 1.2rem;
+    }
+  }
+
+  .coordinate-actions {
+    align-items: 'stretch';
+    background: white;
+    display: flex;
+
+    button {
+      border: 0 none;
+      flex: 1;
+    }
+  }
+}

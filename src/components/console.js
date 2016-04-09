@@ -7,16 +7,8 @@ export default React.createClass({
   name: 'Console',
 
   propTypes: {
-    commands: React.PropTypes.array,
+    commands: React.PropTypes.array.isRequired,
     sendCommand: React.PropTypes.func.isRequired,
-    visible: React.PropTypes.bool,
-  },
-
-  getDefaultProps() {
-    return {
-      commands: [],
-      visible: true,
-    }
   },
 
   getInitialState() {
@@ -36,6 +28,7 @@ export default React.createClass({
     console.log('form submitted', val)
     this.props.sendCommand(val)
     node.value = ''
+    this.setState({ disabled: true })
     // TODO: set state here instead
   },
 
@@ -45,12 +38,12 @@ export default React.createClass({
     if (this.props.commands.length) {
       const list = this.props.commands.map((command, index) => {
         return (
-          <li key={index}>{command.command}</li>
+          <li key={index}>{command}</li>
         )
       })
 
       commands = (
-        <ul className='list-unstyled'>{list}</ul>
+        <ul className='timeline list-unstyled m-b-0'>{list}</ul>
       )
     } else {
       commands = (
@@ -59,32 +52,30 @@ export default React.createClass({
     }
 
     return (
-      <Card title='Console'>
-        <div className='card-block'>
-          {commands}
-          <form onSubmit={this._handleSubmit}>
-            <div className='input-group'>
-              <input
-                className='form-control'
-                onChange={this._handleChange}
-                placeholder='Enter GCode...'
-                ref='gcode'
-                type='text'
-              />
-              <span className='input-group-btn'>
-                <button
-                  className='btn btn-secondary'
-                  disabled={this.state.disabled}
-                  onClick={this._handleSubmit}
-                  type='submit'
-                >
-                  Run
-                </button>
-              </span>
-            </div>
-          </form>
-        </div>
-      </Card>
+      <div>
+        {commands}
+        <form onSubmit={this._handleSubmit}>
+          <div className='input-group'>
+            <input
+              className='form-control'
+              onChange={this._handleChange}
+              placeholder='Enter GCode...'
+              ref='gcode'
+              type='text'
+            />
+            <span className='input-group-btn'>
+              <button
+                className='btn btn-primary'
+                disabled={this.state.disabled}
+                onClick={this._handleSubmit}
+                type='submit'
+              >
+                Run
+              </button>
+            </span>
+          </div>
+        </form>
+      </div>
     )
   },
 

@@ -1,0 +1,68 @@
+import FA from 'react-fontawesome'
+import React, { PropTypes } from 'react'
+import '../styles/jogging-control.scss'
+
+export default React.createClass({
+
+  name: 'JoggingControl',
+
+  propTypes: {
+    homeAll: PropTypes.func.isRequired,
+    jogXNegative: PropTypes.func.isRequired,
+    jogXPositive: PropTypes.func.isRequired,
+    jogYNegative: PropTypes.func.isRequired,
+    jogYPositive: PropTypes.func.isRequired,
+  },
+
+  render() {
+    const {
+      homeAll,
+      jogXNegative,
+      jogXPositive,
+      jogYNegative,
+      jogYPositive,
+    } = this.props
+
+    return (
+      <div className='jogging-control'>
+        <div className='jog-y-positive'>
+          <button
+            className='btn btn-lg btn-secondary'
+            onClick={jogYPositive}
+          >
+            <FA name='chevron-up' />
+          </button>
+        </div>
+        <div className='jog-x'>
+          <button
+            className='btn btn-lg btn-secondary'
+            onClick={jogXNegative}
+          >
+            <FA name='chevron-left' />
+          </button>
+          <button
+            className='btn btn-lg btn-secondary'
+            onClick={homeAll}
+          >
+            <FA name='home' />
+          </button>
+          <button
+            className='btn btn-lg btn-secondary'
+            onClick={jogXPositive}
+          >
+            <FA name='chevron-right' />
+          </button>
+        </div>
+        <div className='jog-y-negative'>
+          <button
+            className='btn btn-lg btn-secondary'
+            onClick={jogYNegative}
+          >
+            <FA name='chevron-down' />
+          </button>
+        </div>
+      </div>
+    )
+  },
+
+})

@@ -1,1 +1,46 @@
+//----------------------------------
+// Bootstrap settings
+//----------------------------------
+
+// Colors
+$brand-primary: #0e9e92;
+$brand-success: #7cb231;
+$gray-dark: #303c40;
+
+// Fonts
+$font-family-sans-serif: 'Source Sans Pro', sans-serif;
+/*$font-family-serif: 'Montserrat', serif;*/
+
+// General type
+$line-height: 1.6;
+
+// Forms
+$input-border: #ddd;
+$input-border-radius: 0;
+
+// Buttons
+$btn-border-radius: 0;
+$btn-border-radius-lg: 0;
+$btn-border-radius-sm: 0;
+
+// Headings
+$headings-font-weight: 700;
+$headings-font-family: 'Montserrat', sans-serif;
+$headings-color: black;
+$font-size-h1: 2.5rem;
+
+
+//----------------------------------
+// Fontawesome settings
+//----------------------------------
+
 $fa-font-path: '~font-awesome/fonts';
+
+
+//----------------------------------
+// App specific settings
+//----------------------------------
+
+$file-panel-width: 20rem;
+$control-panel-width: 26rem;
+$panel-background: #444;
