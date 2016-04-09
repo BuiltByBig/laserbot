@@ -11,6 +11,15 @@ export default React.createClass({
     homeX: PropTypes.func.isRequired,
     homeY: PropTypes.func.isRequired,
     displayUnits: PropTypes.oneOf(['mm', 'in']).isRequired,
+    status: PropTypes.oneOf([
+      'alarm',
+      'check',
+      'door',
+      'hold',
+      'home',
+      'idle',
+      'run',
+    ]).isRequired,
     x: PropTypes.number.isRequired,
     y: PropTypes.number.isRequired,
     zeroX: PropTypes.func.isRequired,
@@ -40,6 +49,7 @@ export default React.createClass({
   render() {
     const {
       displayUnits,
+      status,
       x,
       y,
     } = this.props
@@ -61,12 +71,14 @@ export default React.createClass({
           <div className='coordinate-actions'>
             <button
               className='btn btn-secondary'
+              disabled={status !== 'idle'}
               onClick={this._zeroX}
             >
               <FA name='ban' title='Zero X axis' />
             </button>
             <button
               className='btn btn-secondary'
+              disabled={status !== 'idle'}
               onClick={this._homeX}
             >
               <FA name='home' title='Home X axis' />
@@ -88,12 +100,14 @@ export default React.createClass({
           <div className='coordinate-actions'>
             <button
               className='btn btn-secondary'
+              disabled={status !== 'idle'}
               onClick={this._zeroY}
             >
               <FA name='ban' title='Zero Y axis' />
             </button>
             <button
               className='btn btn-secondary'
+              disabled={status !== 'idle'}
               onClick={this._homeY}
             >
               <FA name='home' title='Home Y axis' />

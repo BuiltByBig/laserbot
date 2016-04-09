@@ -14,6 +14,15 @@ export default React.createClass({
     jogYNegative: PropTypes.func.isRequired,
     jogYPositive: PropTypes.func.isRequired,
     shortcutsEnabled: PropTypes.bool.isRequired,
+    status: PropTypes.oneOf([
+      'alarm',
+      'check',
+      'door',
+      'hold',
+      'home',
+      'idle',
+      'run',
+    ]).isRequired,
   },
 
   componentWillMount() {
@@ -56,6 +65,7 @@ export default React.createClass({
       jogXPositive,
       jogYNegative,
       jogYPositive,
+      status,
     } = this.props
 
     return (
@@ -63,6 +73,7 @@ export default React.createClass({
         <div className='jog-y-positive'>
           <button
             className='btn btn-lg btn-secondary'
+            disabled={status !== 'idle'}
             onClick={jogYPositive}
           >
             <FA
@@ -74,6 +85,7 @@ export default React.createClass({
         <div className='jog-x'>
           <button
             className='btn btn-lg btn-secondary'
+            disabled={status !== 'idle'}
             onClick={jogXNegative}
           >
             <FA
@@ -83,6 +95,7 @@ export default React.createClass({
           </button>
           <button
             className='btn btn-lg btn-secondary'
+            disabled={status !== 'idle'}
             onClick={homeAll}
           >
             <FA
@@ -92,6 +105,7 @@ export default React.createClass({
           </button>
           <button
             className='btn btn-lg btn-secondary'
+            disabled={status !== 'idle'}
             onClick={jogXPositive}
           >
             <FA
@@ -103,6 +117,7 @@ export default React.createClass({
         <div className='jog-y-negative'>
           <button
             className='btn btn-lg btn-secondary'
+            disabled={status !== 'idle'}
             onClick={jogYNegative}
           >
             <FA
