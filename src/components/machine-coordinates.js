@@ -8,6 +8,7 @@ export default React.createClass({
   name: 'MachineCoordinates',
 
   propTypes: {
+    connectedToDevice: PropTypes.bool.isRequired,
     homeX: PropTypes.func.isRequired,
     homeY: PropTypes.func.isRequired,
     displayUnits: PropTypes.oneOf(['mm', 'in']).isRequired,
@@ -48,11 +49,14 @@ export default React.createClass({
 
   render() {
     const {
+      connectedToDevice,
       displayUnits,
       status,
       x,
       y,
     } = this.props
+
+    const enabled = connectedToDevice && status === 'idle'
 
     return (
       <div>
@@ -71,14 +75,14 @@ export default React.createClass({
           <div className='coordinate-actions'>
             <button
               className='btn btn-secondary'
-              disabled={status !== 'idle'}
+              disabled={!enabled}
               onClick={this._zeroX}
             >
               <FA name='ban' title='Zero X axis' />
             </button>
             <button
               className='btn btn-secondary'
-              disabled={status !== 'idle'}
+              disabled={!enabled}
               onClick={this._homeX}
             >
               <FA name='home' title='Home X axis' />
@@ -100,14 +104,14 @@ export default React.createClass({
           <div className='coordinate-actions'>
             <button
               className='btn btn-secondary'
-              disabled={status !== 'idle'}
+              disabled={!enabled}
               onClick={this._zeroY}
             >
               <FA name='ban' title='Zero Y axis' />
             </button>
             <button
               className='btn btn-secondary'
-              disabled={status !== 'idle'}
+              disabled={!enabled}
               onClick={this._homeY}
             >
               <FA name='home' title='Home Y axis' />

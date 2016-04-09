@@ -223,11 +223,19 @@ export default React.createClass({
     this.setState(this.state)
   },
 
+  _killAlarm() {
+    console.log('killAlarm')
+    this.setState({ status: 'idle' })
+    this._sendCommand('$X ; kill alarm', (err) => {
+      console.log('killAlarm received')
+    })
+  },
+
   _pause() {
     console.log('pause')
     this.setState({ status: 'hold' })
     this._sendCommand('! ; feed hold', (err) => {
-      console.log('play received')
+      console.log('pause received')
     })
   },
 
@@ -236,6 +244,14 @@ export default React.createClass({
     this.setState({ status: 'run' })
     this._sendCommand('~ ; cycle start', (err) => {
       console.log('play received')
+    })
+  },
+
+  _stop() {
+    console.log('stop')
+    this.setState({ status: 'idle' })
+    this._sendCommand('M2; stop machine', (err) => {
+      console.log('stop received')
     })
   },
 
@@ -353,6 +369,8 @@ export default React.createClass({
       z,
     } = this.state
 
+    const connectedToDevice = Boolean(connectedDevice)
+
     return (
       <div className='app-container'>
         <Navigation
@@ -407,6 +425,8 @@ export default React.createClass({
           <div className='control-panel'>
             <div className='m-b-2'>
               <PlayPauseButton
+                connectedToDevice={connectedToDevice}
+                killAlarm={this._killAlarm}
                 pause={this._pause}
                 play={this._play}
                 status={status}
@@ -415,6 +435,7 @@ export default React.createClass({
             </div>
             <div className='m-b-2'>
               <JoggingControl
+                connectedToDevice={connectedToDevice}
                 homeAll={this._homeAll}
                 jogXNegative={this._jogXNegative}
                 jogXPositive={this._jogXPositive}
@@ -426,6 +447,7 @@ export default React.createClass({
             </div>
             <div className='m-b-2'>
               <MachineCoordinates
+                connectedToDevice={connectedToDevice}
                 displayUnits='mm'
                 homeX={this._homeX}
                 homeY={this._homeY}

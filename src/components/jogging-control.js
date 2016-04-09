@@ -8,6 +8,7 @@ export default React.createClass({
   name: 'JoggingControl',
 
   propTypes: {
+    connectedToDevice: PropTypes.bool.isRequired,
     homeAll: PropTypes.func.isRequired,
     jogXNegative: PropTypes.func.isRequired,
     jogXPositive: PropTypes.func.isRequired,
@@ -60,6 +61,7 @@ export default React.createClass({
 
   render() {
     const {
+      connectedToDevice,
       homeAll,
       jogXNegative,
       jogXPositive,
@@ -68,12 +70,14 @@ export default React.createClass({
       status,
     } = this.props
 
+    const enabled = connectedToDevice && status === 'idle'
+
     return (
       <div className='jogging-control'>
         <div className='jog-y-positive'>
           <button
             className='btn btn-lg btn-secondary'
-            disabled={status !== 'idle'}
+            disabled={!enabled}
             onClick={jogYPositive}
           >
             <FA
@@ -85,7 +89,7 @@ export default React.createClass({
         <div className='jog-x'>
           <button
             className='btn btn-lg btn-secondary'
-            disabled={status !== 'idle'}
+            disabled={!enabled}
             onClick={jogXNegative}
           >
             <FA
@@ -95,7 +99,7 @@ export default React.createClass({
           </button>
           <button
             className='btn btn-lg btn-secondary'
-            disabled={status !== 'idle'}
+            disabled={!enabled}
             onClick={homeAll}
           >
             <FA
@@ -105,7 +109,7 @@ export default React.createClass({
           </button>
           <button
             className='btn btn-lg btn-secondary'
-            disabled={status !== 'idle'}
+            disabled={!enabled}
             onClick={jogXPositive}
           >
             <FA
@@ -117,7 +121,7 @@ export default React.createClass({
         <div className='jog-y-negative'>
           <button
             className='btn btn-lg btn-secondary'
-            disabled={status !== 'idle'}
+            disabled={!enabled}
             onClick={jogYNegative}
           >
             <FA
