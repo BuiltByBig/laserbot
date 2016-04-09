@@ -57,14 +57,17 @@ export default React.createClass({
   },
 
   _onConnect() {
+    console.log('onConnect')
     this.setState({ connectedToWebsockets: true })
   },
 
   _onDisconnect() {
+    console.log('onDisconnect')
     this.setState({ connectedToWebsockets: false })
   },
 
   _onAvailablePorts(ports) {
+    console.log('onAvailablePorts', ports)
     const devices = ports.map((port) => {
       return {
         name: port.comName,
@@ -75,7 +78,12 @@ export default React.createClass({
   },
 
   _onResponse(msg) {
-    console.log('response', msg)
+    console.log('onResponse', msg)
+
+    if (!msg) {
+      console.log('empty message')
+      return
+    }
 
     // Strip "ok" messages if configured
     if (this.state.stripOkStatusMessages && msg === 'ok') {
@@ -107,6 +115,7 @@ export default React.createClass({
   },
 
   _logCommand(type, content) {
+    // TODO: show what commands have been received or are pending
     this.state.commands.push({
       content,
       type,
@@ -165,19 +174,20 @@ export default React.createClass({
   },
 
   _disconnectFromDevice(name) {
-    const devices = this.state.devices.map((device) => {
-      if (device.name === name) {
-        device.open = false
-      }
-      return device
-    })
+    this.socket.emit('disconnect from device', () => {
+      const devices = this.state.devices.map((device) => {
+        if (device.name === name) {
+          device.open = false
+        }
+        return device
+      })
 
-    this.setState({
-      connectedDevice: null,
-      devices,
+      this.setState({
+        connectedDevice: null,
+        commands: [],
+        devices,
+      })
     })
-
-    // TODO: emit disconnect event
   },
 
 
@@ -194,16 +204,17 @@ export default React.createClass({
   _pause() {
     console.log('pause')
     this.setState({ status: 'hold' })
+    this._sendCommand('! ; feed hold', (err) => {
+      console.log('play received')
+    })
   },
 
   _play() {
     console.log('play')
     this.setState({ status: 'run' })
-  },
-
-  _stop() {
-    console.log('stop')
-    this.setState({ status: 'idle' })
+    this._sendCommand('~ ; cycle start', (err) => {
+      console.log('play received')
+    })
   },
 
   _homeAll() {
@@ -290,6 +301,7 @@ export default React.createClass({
     const {
       commands,
       connectedDevice,
+      connectedToWebsockets,
       devices,
       files,
       logs,
@@ -306,6 +318,7 @@ export default React.createClass({
       <div className='app-container'>
         <Navigation
           connectedDevice={connectedDevice}
+          connectedToWebsockets={connectedToWebsockets}
           disconnectFromDevice={this._disconnectFromDevice}
           dismissNotification={this._dismissNotification}
           notifications={notifications}
@@ -341,7 +354,7 @@ export default React.createClass({
                   />
                 </div> :
                 <div>
-                  <h4>Devices</h4>
+                  <h3>Devices</h3>
                   <Devices
                     connectToDevice={this._connectToDevice}
                     devices={devices}

@@ -9,6 +9,7 @@ export default React.createClass({
 
   propTypes: {
     connectedDevice: PropTypes.object,
+    connectedToWebsockets: PropTypes.bool.isRequired,
     disconnectFromDevice: PropTypes.func.isRequired,
     dismissNotification: PropTypes.func.isRequired,
     notifications: PropTypes.array.isRequired,
@@ -17,6 +18,7 @@ export default React.createClass({
   render() {
     const {
       connectedDevice,
+      connectedToWebsockets,
       disconnectFromDevice,
       dismissNotification,
       notifications,
@@ -46,7 +48,23 @@ export default React.createClass({
     return (
       <nav className='navbar navbar-full navbar-dark bg-inverse'>
         <div className='row'>
-          <h1 className='navbar-brand pull-sm-left p-l-2'>Laserbot</h1>
+          <h1 className='navbar-brand pull-sm-left p-l-2'>
+            <span className='p-r-1'>Laserbot</span>
+            {' '}
+            {
+              connectedToWebsockets ?
+                <FA
+                  className='text-success'
+                  name='check'
+                  title='Connected to Websocket server'
+                /> :
+                <FA
+                  className='text-danger'
+                  name='times'
+                  title='Disconnected from Websocket server'
+                />
+            }
+          </h1>
           {connection}
           <div className='navigation-notifications'>
             <NotificationBar

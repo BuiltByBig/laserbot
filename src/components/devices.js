@@ -60,7 +60,7 @@ export default React.createClass({
     })
 
     return (
-      <table className='table m-a-0 table-sm'>
+      <table className='table'>
         <tbody>
           {table}
         </tbody>

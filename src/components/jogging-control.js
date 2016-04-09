@@ -65,7 +65,10 @@ export default React.createClass({
             className='btn btn-lg btn-secondary'
             onClick={jogYPositive}
           >
-            <FA name='chevron-up' />
+            <FA
+              name='chevron-up'
+              title='Jog in +Y'
+            />
           </button>
         </div>
         <div className='jog-x'>
@@ -73,19 +76,28 @@ export default React.createClass({
             className='btn btn-lg btn-secondary'
             onClick={jogXNegative}
           >
-            <FA name='chevron-left' />
+            <FA
+              name='chevron-left'
+              title='Jog in -X'
+            />
           </button>
           <button
             className='btn btn-lg btn-secondary'
             onClick={homeAll}
           >
-            <FA name='home' />
+            <FA
+              name='home'
+              title='Home all axis'
+            />
           </button>
           <button
             className='btn btn-lg btn-secondary'
             onClick={jogXPositive}
           >
-            <FA name='chevron-right' />
+            <FA
+              name='chevron-right'
+              title='Jog in +X'
+            />
           </button>
         </div>
         <div className='jog-y-negative'>
@@ -93,7 +105,10 @@ export default React.createClass({
             className='btn btn-lg btn-secondary'
             onClick={jogYNegative}
           >
-            <FA name='chevron-down' />
+            <FA
+              name='chevron-down'
+              title='Jog in -Y'
+            />
           </button>
         </div>
       </div>

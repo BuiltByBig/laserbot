@@ -10,7 +10,9 @@ module.exports = {
   debug: !isProduction,
   devtool: !isProduction ? 'eval' : null,
   entry: {
-    bundle: [ './src/index.js' ],
+    bundle: [
+      './src/index.js',
+    ],
   },
   output: {
     filename: '[name].js',
@@ -43,7 +45,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /(node_modules|src\/styles)/,
-        loader: 'babel',
+        loaders: [ 'react-hot', 'babel' ],
       },
       {
         test: /\.scss/,
