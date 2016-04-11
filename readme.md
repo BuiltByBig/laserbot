@@ -1,43 +1,43 @@
-# CNC
+# Laserbot
 
-> The easiest to use open-source CNC software
+> Laser cutter software for grbl based machines.
+![screenshot](http://f.cl.ly/items/1m200F1a2q0u2D3J2W1f/Screen%20Shot%202016-04-08%20at%2010.41.22%20PM.png)
 
-## TODO
+## Features
 
-### General
+- Convert `.svg`, `.jpg`, `.png`, `.gif` files to Gcode
+- Show current machine state and position
+- Send gcode directly to the machine
+- Load Gcode files
+- Keyboard shortcuts:
+  - `spacebar` -- Pause/resume (aka feedhold/cycle start)
+  - `up/down/left/right` -- Jog machine 1mm in X/Y
+- Set grbl config settings via a UI
+- Home machine
 
-- [ ] Import Gcode from file
-  - [ ] Drag + drop support
+
+## Usage
+
+```bash
+nvm use
+nvm install
+npm install
+npm run watch
+```
+
+
+## Todos
+
+- [ ] Preview gcode
+- [ ] Resize, rotate, flip operations
+- [ ] Drag + drop support
 - [ ] Keyboard shortcuts:
-  - left/right => x
-  - up/down => y
-  - page up/down => z
-  - spacebar => feedhold
-  - escape => emergency stop
-- [ ] Edit grbl shield settings
-
-
-### Machine Control
-
-- [ ] Step x, y, z
-- [ ] Change increment value
-- [ ] Save custom default step
-
-
-### Console
-
-- [ ] Send gcode to device
-- [ ] Get and display message from device
+- [ ] Change jog increment value
+- [ ] Store files in localstorage
+- [ ] Store config in localstorage
 - [ ] Clear the console
-- [ ] Arrow up/down
-- [ ] Disable console from updating
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
 
 
-### Nice to have
+## License
 
-- Custom widgets
-  - Resizeable
+[MIT](license) by [Dana Woodman](http://danawoodman.com)
