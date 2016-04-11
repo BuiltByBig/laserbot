@@ -1,6 +1,7 @@
 # Laserbot
 
 > Laser cutter software for grbl based machines.
+
 ![screenshot](http://f.cl.ly/items/1m200F1a2q0u2D3J2W1f/Screen%20Shot%202016-04-08%20at%2010.41.22%20PM.png)
 
 ## Features
