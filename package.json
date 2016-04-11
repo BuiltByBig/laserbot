@@ -7,10 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "webpack --colors",
-    "play": "nodemon --exec babel-node test.js",
-    "start": "nodemon --exec babel-node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha .",
     "watch": "webpack-dev-server --inline --hot --content-base src"
   },
   "author": "Dana Woodman <dana@danawoodman.com> (http://danawoodman.com/)",

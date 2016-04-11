@@ -10,7 +10,7 @@ export default React.createClass({
 
   propTypes: {
     commands: React.PropTypes.array.isRequired,
-    sendCommand: React.PropTypes.func.isRequired,
+    sendCommands: React.PropTypes.func.isRequired,
   },
 
   getInitialState() {
@@ -33,12 +33,12 @@ export default React.createClass({
     this.setState({ disabled: !this.refs.gcode.value })
   },
 
-  _handleSubmit(e) {
+  async _handleSubmit(e) {
     e.preventDefault()
     const node = this.refs.gcode
     const val = node.value.trim()
     console.log('form submitted', val)
-    this.props.sendCommand(val)
+    await this.props.sendCommands([ val ])
     node.value = ''
     this.setState({ disabled: true })
     // TODO: set state here instead

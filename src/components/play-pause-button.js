@@ -16,6 +16,7 @@ export default React.createClass({
       'alarm',
       'check',
       'door',
+      'error',
       'hold',
       'home',
       'idle',
@@ -55,7 +56,6 @@ export default React.createClass({
     let icon
     let label
     let enabled = true
-    console.log(status)
     if (!connectedToDevice) {
       className += ' btn-warning'
       enabled = false
@@ -81,6 +81,12 @@ export default React.createClass({
       className += ' btn-warning'
       icon = 'bell-o'
       label = 'Reset Alarm'
+    } else if (status === 'error') {
+      action = killAlarm
+      className += ' btn-danger'
+      enabled = false
+      icon = 'exclamation-triangle'
+      label = 'Restart Machine'
     } else if (status === 'door') {
       action = killAlarm
       className += ' btn-warning'

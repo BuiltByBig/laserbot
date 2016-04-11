@@ -32,25 +32,31 @@ export default React.createClass({
     } = this.props
 
     return (
-      <ul className='list-group'>
-        {files.map((file, index) =>
-          <li className='list-group-item' key={index}>
-            <a
-              className='pull-sm-right'
-              href=''
-              onClick={(e) => this._removeFile(e, index)}
-            >
-              X
-            </a>
-            <a
-              href=''
-              onClick={(e) => this._loadFile(e, index)}
-            >
-              {file.name}
-            </a>
-          </li>
-        )}
-      </ul>
+      <table className='table table-sm'>
+        <tbody>
+          {files.map((file, index) =>
+            <tr key={index}>
+              <td>
+                <a
+                  href=''
+                  onClick={(e) => this._loadFile(e, index)}
+                >
+                  {file.name}
+                </a>
+              </td>
+              <td>
+                <a
+                  className='pull-sm-right'
+                  href=''
+                  onClick={(e) => this._removeFile(e, index)}
+                >
+                  X
+                </a>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     )
   },
 

@@ -15,8 +15,9 @@ export default React.createClass({
     devices: PropTypes.array.isRequired,
     disconnectFromDevice: PropTypes.func.isRequired,
     hideSettings: PropTypes.func.isRequired,
+    fetchDevices: PropTypes.func.isRequired,
     machineConfig: PropTypes.object.isRequired,
-    sendCommand: PropTypes.func.isRequired,
+    sendCommands: PropTypes.func.isRequired,
     settingsVisible: PropTypes.bool.isRequired,
     updateConfig: PropTypes.func.isRequired,
   },
@@ -32,12 +33,12 @@ export default React.createClass({
       fetchDevices,
       hideSettings,
       machineConfig,
-      sendCommand,
+      sendCommands,
       settingsVisible,
       updateConfig,
     } = this.props
 
-    if (!connectToDevice) {
+    if (!connectedToDevice) {
       return (
         <div>
           <h3>Devices</h3>
@@ -71,7 +72,7 @@ export default React.createClass({
         <h4 className='m-t-2'>Commands</h4>
         <Console
           commands={commands}
-          sendCommand={sendCommand}
+          sendCommands={sendCommands}
         />
       </div>
     )

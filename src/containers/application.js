@@ -27,7 +27,6 @@ export default React.createClass({
         '$111': 500,
       },
       jogDistance: 1,
-      logs: [],
       notifications: [
         {
           message: 'Here is a notification...',
@@ -36,7 +35,7 @@ export default React.createClass({
       shortcutsEnabled: true,
       settingsVisible: false,
       startupBlocks: [
-        //'G91', // set relative coordinate system
+        '$$ ; get grbl settings', // set relative coordinate system
       ],
       status: 'idle',
       stripOkStatusMessages: true,
@@ -49,8 +48,8 @@ export default React.createClass({
         '.svg',
         '.txt',
       ],
-      x: 10.25,
-      y: 36.732,
+      x: 0,
+      y: 0,
     }
   },
 
@@ -59,6 +58,9 @@ export default React.createClass({
     this.socket.on('connect', this._onConnect)
     this.socket.on('disconnect', this._onDisconnect)
     this.socket.on('response', this._onResponse)
+    this.socket.on('serial connect', this._onSerialConnect)
+    this.socket.on('serial disconnect', this._onSerialDisconnect)
+    this.socket.on('serial error', this._onSerialError)
     this.socket.on('available ports', this._onAvailablePorts)
   },
 
@@ -83,12 +85,35 @@ export default React.createClass({
     this.setState({ devices })
   },
 
-  _onResponse(msg) {
+  _onSerialConnect() {
+    console.log('serial connect')
+    this.setState({ connectedToDevice: true })
+  },
+
+  _onSerialDisconnect() {
+    console.log('serial disconnect')
+    this.setState({ connectedToDevice: false })
+  },
+
+  _onSerialError(err) {
+    console.log('serial error', err)
+    this.state.notifications.push({
+      type: 'error',
+      message: err,
+    })
+    this.setState(this.state)
+  },
+
+  async _onResponse(msg) {
     console.log('onResponse', msg)
 
     if (!msg) {
       console.log('empty message')
       return
+    }
+
+    if (msg.includes('[Reset to continue]')) {
+      this.setState({ status: 'alarm' })
     }
 
     // Strip "ok" messages if configured
@@ -100,36 +125,42 @@ export default React.createClass({
     const startupBlocks = this.state.startupBlocks
     if (startupBlocks.length && msg.startsWith('Grbl')) {
       console.log('sending startup blocks', startupBlocks)
-      startupBlocks.forEach((block) => {
-        this._sendCommand(block)
-      })
+      await this._sendCommands(startupBlocks)
     }
 
     this._logCommand('system', msg)
   },
 
+  // Promisify? could prevent buffer overflow/blocking...
   _sendCommand(cmd, cb) {
     console.log('send command', cmd)
-    this.socket.emit('send command', cmd, (err) => {
+    this.socket.emit('send command', cmd, (err, data) => {
       if (err) {
-        cb && cb(new Error('error sending command: ' + err))
+        console.error(`error sending command ${cmd}:`, err)
+        cb && cb(new Error(`error sending command ${cmd}: ${err.message}`), null)
         return
       }
       this._logCommand('user', cmd)
-      cb && cb()
+      cb && cb(null, data)
     })
   },
 
-  async _sendCommands(cmds, cb) {
-    console.log('send commands', cmds)
+  async _sendCommands(cmds) {
+    console.log('send commands:', cmds)
     for (let cmd of cmds) {
+
+      // Skip empty commands.
+      if (!cmd) {
+        continue
+      }
+
       console.log('cmd', cmd)
       await new Promise((resolve, reject) => {
-        this._sendCommand(cmd, (err) => {
+        this._sendCommand(cmd, (err, data) => {
           if (err) {
             return reject(err)
           }
-          resolve()
+          resolve(data)
         })
       })
     }
@@ -187,6 +218,8 @@ export default React.createClass({
         return device
       })
 
+      // TODO: get grbl settings on connect and set
+
       this.setState({
         connectedDevice,
         devices,
@@ -227,23 +260,9 @@ export default React.createClass({
 
     // Run serially so the buffer doesn't overflow on
     // grbl
-    for (let line of lines) {
+    await this._sendCommands(lines)
 
-      // Skip blank lines
-      if (!line) {
-        continue
-      }
-
-      // TODO: need to find a way to pause commands if a feedhold is fired
-      await new Promise((resolve, reject) => {
-        this._sendCommand(line, (err) => {
-          if (err) {
-            return reject(err)
-          }
-          resolve()
-        })
-      })
-    }
+    this.setState({ status: 'idle' })
   },
 
   _dismissNotification(index) {
@@ -251,133 +270,94 @@ export default React.createClass({
     this.setState(this.state)
   },
 
-  _killAlarm() {
+  async _killAlarm() {
     console.log('killAlarm')
     this.setState({ status: 'idle' })
-    this._sendCommand('$X ; kill alarm', (err) => {
-      console.log('killAlarm received')
-    })
+    await this._sendCommands([ '$X ; kill alarm' ])
+    console.log('killAlarm received')
   },
 
-  _pause() {
+  async _pause() {
     console.log('pause')
     this.setState({ status: 'hold' })
-    this._sendCommand('! ; feed hold', (err) => {
-      console.log('pause received')
-    })
+    await this._sendCommands([ '! ; feed hold' ])
+    console.log('pause received')
   },
 
-  _play() {
+  async _play() {
     console.log('play')
     this.setState({ status: 'run' })
-    this._sendCommand('~ ; cycle start', (err) => {
-      console.log('play received')
-    })
+    await this._sendCommands([ '~ ; cycle start' ])
+    console.log('play success')
   },
 
-  _stop() {
+  async _stop() {
     console.log('stop')
     this.setState({ status: 'idle' })
-    this._sendCommand('M2 ~ ; stop machine and reset hold', (err) => {
-      console.log('stop received')
-    })
+    await this._sendCommands([ 'M2 ~ ; stop machine and reset hold' ])
+    console.log('stop success')
   },
 
-  _homeAll() {
+  async _homeAll() {
     console.log('homeAll')
     // $H if home switches are enabled, otherwise 'G91 G0 X0 Y0 Z0'
-    this._sendCommand('G90 G0 X0 Y0 Z0', (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('homing success')
-      this.setState({ x: 0, y: 0 })
-    })
+    await this._sendCommands([ 'G90 G0 X0 Y0 Z0' ])
+    console.log('homeAll success')
+    this.setState({ x: 0, y: 0 })
   },
 
-  _homeX() {
+  async _homeX() {
     console.log('homeX')
-    this._sendCommand('G90 G0 X0', (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('homeX success')
-      this.setState({ x: 0 })
-    })
+    await this._sendCommands([ 'G90 G0 X0' ])
+    console.log('homeX success')
+    this.setState({ x: 0 })
   },
 
-  _homeY() {
+  async _homeY() {
     console.log('homeY')
-    this._sendCommand('G90 G0 Y0', (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('homeY success')
-      this.setState({ y: 0 })
-    })
+    await this._sendCommands([ 'G90 G0 Y0' ])
+    console.log('homeY success')
+    this.setState({ y: 0 })
   },
 
-  _jogXNegative() {
+  async _jogXNegative() {
     console.log('jogXNegative')
-    this._sendCommand(`G91 G0 X-${this.state.jogDistance}`, (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('jogXNegative success')
-      this.setState({ x: this.state.x - this.state.jogDistance })
-    })
+    await this._sendCommands([ `G91 G0 X-${this.state.jogDistance}` ])
+    console.log('jogXNegative success')
+    this.setState({ x: this.state.x - this.state.jogDistance })
   },
 
-  _jogXPositive() {
+  async _jogXPositive() {
     console.log('jogXPositive')
-    this._sendCommand(`G91 G0 X${this.state.jogDistance}`, (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('jogXPositive success')
-      this.setState({ x: this.state.x + this.state.jogDistance })
-    })
+    await this._sendCommands([ `G91 G0 X${this.state.jogDistance}` ])
+    console.log('jogXPositive success')
+    this.setState({ x: this.state.x + this.state.jogDistance })
   },
 
-  _jogYNegative() {
+  async _jogYNegative() {
     console.log('jogYNegative')
-    this._sendCommand(`G91 G0 Y-${this.state.jogDistance}`, (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('jogYNegative success')
-      this.setState({ y: this.state.y - this.state.jogDistance })
-    })
+    await this._sendCommands([ `G91 G0 Y-${this.state.jogDistance}` ])
+    console.log('jogYNegative success')
+    this.setState({ y: this.state.y - this.state.jogDistance })
   },
 
-  _jogYPositive() {
+  async _jogYPositive() {
     console.log('jogYPositive')
-    this._sendCommand(`G91 G0 Y${this.state.jogDistance}`, (err) => {
-      if (err) {
-        throw err
-      }
-
-      console.log('jogYPositive success')
-      this.setState({ y: this.state.y + this.state.jogDistance })
-    })
+    await this._sendCommands([ `G91 G0 Y${this.state.jogDistance}` ])
+    console.log('jogYPositive success')
+    this.setState({ y: this.state.y + this.state.jogDistance })
   },
 
-  _zeroX() {
+  async _zeroX() {
     console.log('zeroX')
     this.setState({ x: 0 })
-    this._sendCommand('G92 X0')
+    await this._sendCommands([ 'G92 X0' ])
   },
 
-  _zeroY() {
+  async _zeroY() {
     console.log('zeroY')
     this.setState({ y: 0 })
-    this._sendCommand('G92 Y0')
+    await this._sendCommands([ 'G92 Y0' ])
   },
 
   async _updateConfig(config) {
@@ -402,7 +382,6 @@ export default React.createClass({
       devices,
       files,
       grblConfig,
-      logs,
       notifications,
       shortcutsEnabled,
       settingsVisible,
@@ -454,8 +433,9 @@ export default React.createClass({
               devices={devices}
               disconnectFromDevice={this._disconnectFromDevice}
               hideSettings={this._hideSettings}
+              fetchDevices={this._fetchDevices}
               machineConfig={grblConfig}
-              sendCommand={this._sendCommand}
+              sendCommands={this._sendCommands}
               settingsVisible={settingsVisible}
               updateConfig={this._updateConfig}
             />

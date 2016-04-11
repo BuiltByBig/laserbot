@@ -19,6 +19,7 @@ export default React.createClass({
       'alarm',
       'check',
       'door',
+      'error',
       'hold',
       'home',
       'idle',
