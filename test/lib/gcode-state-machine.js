@@ -1,6 +1,6 @@
 import stateMachine from '~/lib/gcode-state-machine'
 
-describe.only('lib/gcode-stateMachine', () => {
+describe('lib/gcode-stateMachine', () => {
   let machine
 
   beforeEach(() => {
