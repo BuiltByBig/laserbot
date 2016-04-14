@@ -1,19 +1,20 @@
 {
-  "name": "cnc",
+  "name": "laserbot-client",
+  "description": "Laserbot React client application",
   "version": "1.0.0",
-  "description": "",
   "main": "webpack.config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "build": "webpack --colors",
     "test": "NODE_ENV=test mocha",
     "watch": "npm run watch-build & npm run watch-test",
     "watch-build": "webpack-dev-server --inline --hot --content-base src",
     "watch-test": "npm test -- -w"
   },
-  "author": "Dana Woodman <dana@danawoodman.com> (http://danawoodman.com/)",
-  "license": "ISC",
+  "author": "Dana Woodman <dana@builtbybig.com> (http://builtbybig.com/)",
+  "license": "MIT",
   "dependencies": {
     "babel": "6.3.26",
     "babel-cli": "6.3.17",
@@ -63,5 +64,13 @@
     "style-loader": "0.13.0",
     "webpack": "1.12.9",
     "webpack-dev-server": "1.14.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/builtbybig/laserbot-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/builtbybig/laserbot-client/issues"
+  },
+  "homepage": "https://github.com/builtbybig/laserbot-client#readme"
 }
