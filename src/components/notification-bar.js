@@ -29,16 +29,18 @@ export default React.createClass({
       <ul className='list-unstyled m-a-0'>
         {notifications.map((notification, index) =>
           <li
-            className='text-warning'
+            className={`bg-${notification.type || 'warning'} p-x-1`}
             key={index}
           >
-            {notification.message}
-            <a
-              href=''
+            <button
+              className='close pull-sm-right'
               onClick={(e) => this._dismissNotification(e, index)}
             >
-              X
-            </a>
+              <span>&times;</span>
+            </button>
+            <strong>
+              {notification.message}
+            </strong>
           </li>
         )}
       </ul>

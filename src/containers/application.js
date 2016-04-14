@@ -30,6 +30,7 @@ export default React.createClass({
       notifications: [
         {
           message: 'Here is a notification...',
+          type: 'danger',
         },
       ],
       shortcutsEnabled: true,
