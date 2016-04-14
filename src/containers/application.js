@@ -4,6 +4,7 @@ import JoggingControl from '../components/jogging-control'
 import io from 'socket.io-client'
 import MachineCoordinates from '../components/machine-coordinates'
 import Navigation from '../components/navigation'
+import parser from '~/lib/parse-gcode'
 import PlayPauseButton from '../components/play-pause-button'
 import PreviewPane from '../components/preview-pane'
 import React, { PropTypes } from 'react'
@@ -132,6 +133,14 @@ export default React.createClass({
     this._logCommand('system', msg)
   },
 
+  _parseCommand(cmd) {
+    console.log('parsing command', cmd)
+    console.log(parser(cmd))
+    //gcode.parseString(cmd, (err, result) => {
+      //console.log('result', JSON.stringify(result));
+    //})
+  },
+
   // Promisify? could prevent buffer overflow/blocking...
   _sendCommand(cmd, cb) {
     console.log('send command', cmd)
@@ -154,6 +163,8 @@ export default React.createClass({
       if (!cmd) {
         continue
       }
+
+      this._parseCommand(cmd)
 
       console.log('cmd', cmd)
       await new Promise((resolve, reject) => {
