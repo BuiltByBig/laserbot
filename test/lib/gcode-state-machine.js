@@ -144,4 +144,35 @@ describe('lib/gcode-stateMachine', () => {
     })
   })
 
+  xit('should handle setting units', () => {
+    // G20 = inchces, G21 = mm
+  })
+
+  xit('should handle coolant', () => {
+   // M7,8,9
+  })
+
+  xit('should handle tool changes', () => {
+    // M6, T commands
+  })
+
+  xit('should handle program start/stop', () => {
+    //M0 program stop
+    //- pause temporarily
+    //M1 optional program stop
+    //M2 program end
+    //- coolant, spindle off, absolute mode
+    //M3 turn spindle clockwise
+    //M4 turn spindle counterclockwise
+    //M5 stop spindle turning
+    //M6 tool change
+    //M7 mist coolant on
+    //M8 flood coolant on
+    //M9 mist and flood coolant off
+    //M30 program end, pallet shuttle, and reset
+    //M48 enable speed and feed overrides
+    //M49 disable speed and feed overrides
+    //M60 pallet shuttle and program stop
+  })
+
 })
