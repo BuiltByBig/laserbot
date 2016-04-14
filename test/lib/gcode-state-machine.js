@@ -13,8 +13,10 @@ describe('lib/gcode-stateMachine', () => {
       history: [
         'G0 X5 Y10 Z15',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: null,
+      units: 'mm',
       x: 5,
       y: 10,
       z: 15,
@@ -27,8 +29,10 @@ describe('lib/gcode-stateMachine', () => {
       history: [
         'G0 X5 Y10 Z15',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: null,
+      units: 'mm',
       x: 5,
       y: 10,
       z: 15,
@@ -40,8 +44,10 @@ describe('lib/gcode-stateMachine', () => {
         'G0 X5 Y10 Z15',
         'G0 X-10 Y5 Z-5',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: null,
+      units: 'mm',
       x: -5,
       y: 15,
       z: 10,
@@ -54,8 +60,10 @@ describe('lib/gcode-stateMachine', () => {
       history: [
         'G0 X10 S150',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: 150,
+      units: 'mm',
       x: 10,
       y: 0,
       z: 0,
@@ -66,22 +74,26 @@ describe('lib/gcode-stateMachine', () => {
         'G0 X10 S150',
         'G0 X5 S500',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: 500,
+      units: 'mm',
       x: 15,
       y: 0,
       z: 0,
     })
   })
 
-  it('should handle spindle on/off', () => {
+  it('should handle spindle on/off and direction', () => {
     expect(machine('M3')).to.deep.equal({
       distanceMode: 'relative',
       history: [
         'M3',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: true,
       spindleSpeed: null,
+      units: 'mm',
       x: 0,
       y: 0,
       z: 0,
@@ -92,8 +104,10 @@ describe('lib/gcode-stateMachine', () => {
         'M3',
         'M5',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: null,
+      units: 'mm',
       x: 0,
       y: 0,
       z: 0,
@@ -108,8 +122,10 @@ describe('lib/gcode-stateMachine', () => {
         'G0 X10 Y10 Z10 S200',
         'M5',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: true,
       spindleSpeed: 200,
+      units: 'mm',
       x: 10,
       y: 10,
       z: 10,
@@ -136,16 +152,44 @@ describe('lib/gcode-stateMachine', () => {
         'G0 X10 Y10 Z10',
         'G0 X5 Y5 Z5',
       ],
+      spindleDirection: 'clockwise',
       spindleEnabled: false,
       spindleSpeed: null,
+      units: 'mm',
       x: 5,
       y: 5,
       z: 5,
     })
   })
 
-  xit('should handle setting units', () => {
-    // G20 = inchces, G21 = mm
+  it('should handle setting units', () => {
+    expect(machine('G21')).to.deep.equal({
+      distanceMode: 'relative',
+      history: [
+        'G21',
+      ],
+      spindleDirection: 'clockwise',
+      spindleEnabled: false,
+      spindleSpeed: null,
+      units: 'in',
+      x: 0,
+      y: 0,
+      z: 0,
+    })
+    expect(machine('G20')).to.deep.equal({
+      distanceMode: 'relative',
+      history: [
+        'G21',
+        'G20',
+      ],
+      spindleDirection: 'clockwise',
+      spindleEnabled: false,
+      spindleSpeed: null,
+      units: 'mm',
+      x: 0,
+      y: 0,
+      z: 0,
+    })
   })
 
   xit('should handle coolant', () => {

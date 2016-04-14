@@ -11,9 +11,10 @@ export default () => {
   let state = {
     distanceMode: 'relative', // or 'absolute'
     history: [],
+    spindleDirection: 'clockwise', // or 'counter'
     spindleEnabled: false,
-    // spindleDirection: clockwise/counter
     spindleSpeed: null,
+    units: 'mm', // or 'in'
     x: 0,
     y: 0,
     z: 0,
@@ -34,46 +35,51 @@ export default () => {
 
     // Parse each word and update the state accordingly
     parsed.words.forEach((word) => {
-      const letter = word[0]
-      const argument = word[1]
+      const [ letter, arg ] = word
 
       switch (letter) {
         case 'G':
-          // Handle spindle on/off
-          if (argument === 90) {
+          if (arg === 90) {
             state.distanceMode = 'absolute'
-          } else if (argument === 91) {
+          } else if (arg === 91) {
             state.distanceMode = 'relative'
+          } else if (arg === 20) {
+            state.units = 'mm'
+          } else if (arg === 21) {
+            state.units = 'in'
           }
           break
         case 'M':
           // Handle spindle on/off
-          if (argument === 3 || argument === 5) {
-            state.spindleEnabled = argument === 3
+          if (arg === 3 || arg === 4) {
+            state.spindleEnabled = true
+            state.spindleDirection = arg === 3 ? 'clockwise' : 'counter'
+          } else if (arg === 5) {
+            state.spindleEnabled = false
           }
           break
         case 'S':
-          state.spindleSpeed = argument
+          state.spindleSpeed = arg
           break
         case 'X':
           if (state.distanceMode === 'relative') {
-            state.x += argument
+            state.x += arg
           } else {
-            state.x = argument
+            state.x = arg
           }
           break
         case 'Y':
           if (state.distanceMode === 'relative') {
-            state.y += argument
+            state.y += arg
           } else {
-            state.y = argument
+            state.y = arg
           }
           break
         case 'Z':
           if (state.distanceMode === 'relative') {
-            state.z += argument
+            state.z += arg
           } else {
-            state.z = argument
+            state.z = arg
           }
           break
         default:
