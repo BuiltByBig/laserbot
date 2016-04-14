@@ -31,6 +31,3 @@ node_modules
 
 # Project specific
 public/*
-!public/index.html
-!public/app.js
-!public/app.css
