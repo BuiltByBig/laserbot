@@ -15,6 +15,7 @@ export default () => {
     spindleDirection: 'clockwise', // or 'counter'
     spindleEnabled: false,
     spindleSpeed: null,
+    stopped: false,
     units: 'mm', // or 'in'
     x: 0,
     y: 0,
@@ -52,7 +53,9 @@ export default () => {
           break
         case 'M':
           // Handle spindle on/off
-          if (arg === 3 || arg === 4) {
+          if (arg === 0) {
+            state.stopped = true
+          } else if (arg === 3 || arg === 4) {
             state.spindleEnabled = true
             state.spindleDirection = arg === 3 ? 'clockwise' : 'counter'
           } else if (arg === 5) {

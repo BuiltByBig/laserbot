@@ -19,6 +19,7 @@ describe('lib/gcode-stateMachine', () => {
       spindleDirection: 'clockwise',
       spindleEnabled: true,
       spindleSpeed: 200,
+      stopped: false,
       units: 'mm',
       x: 10,
       y: 10,
@@ -91,12 +92,8 @@ describe('lib/gcode-stateMachine', () => {
     expect(machine('M9').coolant).to.be.false
   })
 
-  xit('should handle tool changes', () => {
-    // M6, T commands
-  })
-
-  xit('should handle program start/stop', () => {
-    //M0 program stop
+  it('should handle program start/stop', () => {
+    expect(machine('M0').stopped).to.be.true
     //- pause temporarily
     //M1 optional program stop
     //M2 program end
@@ -106,6 +103,10 @@ describe('lib/gcode-stateMachine', () => {
     //M48 enable speed and feed overrides
     //M49 disable speed and feed overrides
     //M60 pallet shuttle and program stop
+  })
+
+  xit('should handle tool changes', () => {
+    // M6, T commands
   })
 
 })
