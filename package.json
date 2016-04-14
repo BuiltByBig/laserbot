@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "NODE_ENV=test mocha",
-    "watch": "webpack-dev-server --inline --hot --content-base src",
+    "watch": "npm run watch-build & npm run watch-test",
+    "watch-build": "webpack-dev-server --inline --hot --content-base src",
     "watch-test": "npm test -- -w"
   },
   "author": "Dana Woodman <dana@danawoodman.com> (http://danawoodman.com/)",
