@@ -12,6 +12,7 @@ export default () => {
     distanceMode: 'relative', // or 'absolute'
     history: [],
     spindleEnabled: false,
+    // spindleDirection: clockwise/counter
     spindleSpeed: null,
     x: 0,
     y: 0,
