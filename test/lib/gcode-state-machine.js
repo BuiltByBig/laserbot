@@ -7,120 +7,6 @@ describe('lib/gcode-stateMachine', () => {
     machine = stateMachine()
   })
 
-  it('should change X, Y and Z', () => {
-    expect(machine('G0 X5 Y10 Z15')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G0 X5 Y10 Z15',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'mm',
-      x: 5,
-      y: 10,
-      z: 15,
-    })
-  })
-
-  it('should update state over time', () => {
-    expect(machine('G0 X5 Y10 Z15')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G0 X5 Y10 Z15',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'mm',
-      x: 5,
-      y: 10,
-      z: 15,
-    })
-
-    expect(machine('G0 X-10 Y5 Z-5')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G0 X5 Y10 Z15',
-        'G0 X-10 Y5 Z-5',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'mm',
-      x: -5,
-      y: 15,
-      z: 10,
-    })
-  })
-
-  it('should handle spindle speed', () => {
-    expect(machine('G0 X10 S150')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G0 X10 S150',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: 150,
-      units: 'mm',
-      x: 10,
-      y: 0,
-      z: 0,
-    })
-    expect(machine('G0 X5 S500')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G0 X10 S150',
-        'G0 X5 S500',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: 500,
-      units: 'mm',
-      x: 15,
-      y: 0,
-      z: 0,
-    })
-  })
-
-  it('should handle spindle on/off and direction', () => {
-    expect(machine('M3')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'M3',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: true,
-      spindleSpeed: null,
-      units: 'mm',
-      x: 0,
-      y: 0,
-      z: 0,
-    })
-    expect(machine('M5')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'M3',
-        'M5',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'mm',
-      x: 0,
-      y: 0,
-      z: 0,
-    })
-  })
-
   it('should accept a passed in state object', () => {
     const initialState = {
       coolant: false,
@@ -150,57 +36,53 @@ describe('lib/gcode-stateMachine', () => {
     expect(machine('G0 X-10', initialState)).to.deep.equal(expected)
   })
 
+  it('should change X, Y and Z', () => {
+    const state = machine('G0 X5 Y10 Z15')
+    expect(state.x).to.equal(5)
+    expect(state.y).to.equal(10)
+    expect(state.z).to.equal(15)
+  })
+
+  it('should add each new command to the history', () => {
+    expect(machine('G0 X5 Y10 Z15').history).to.deep.equal([
+      'G0 X5 Y10 Z15',
+    ])
+
+    expect(machine('G0 X-10 Y5 Z-5').history).to.deep.equal([
+      'G0 X5 Y10 Z15',
+      'G0 X-10 Y5 Z-5',
+    ])
+  })
+
+  it('should handle spindle speed', () => {
+    expect(machine('G0 X10 S150').spindleSpeed).to.equal(150)
+    expect(machine('G0 X5 S500').spindleSpeed).to.equal(500)
+    expect(machine('G0 X5 S0').spindleSpeed).to.equal(0)
+  })
+
+  it('should handle spindle on/off and direction', () => {
+    expect(machine('M3').spindleEnabled).to.be.true
+    expect(machine('M5').spindleEnabled).to.be.false
+  })
+
+  it('should handle spindle direction', () => {
+    expect(machine('M4').spindleDirection).to.equal('counter')
+    expect(machine('M3').spindleDirection).to.equal('clockwise')
+  })
+
   it('should handle different distance modes', () => {
     machine('G90')
     machine('G0 X10 Y10 Z10')
-    expect(machine('G0 X5 Y5 Z5')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'absolute',
-      history: [
-        'G90',
-        'G0 X10 Y10 Z10',
-        'G0 X5 Y5 Z5',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'mm',
-      x: 5,
-      y: 5,
-      z: 5,
-    })
+    const state = machine('G0 X5 Y5 Z5')
+    expect(state.distanceMode).to.equal('absolute')
+    expect(state.x).to.equal(5)
+    expect(state.y).to.equal(5)
+    expect(state.z).to.equal(5)
   })
 
   it('should handle setting units', () => {
-    expect(machine('G21')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G21',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'in',
-      x: 0,
-      y: 0,
-      z: 0,
-    })
-    expect(machine('G20')).to.deep.equal({
-      coolant: false,
-      distanceMode: 'relative',
-      history: [
-        'G21',
-        'G20',
-      ],
-      spindleDirection: 'clockwise',
-      spindleEnabled: false,
-      spindleSpeed: null,
-      units: 'mm',
-      x: 0,
-      y: 0,
-      z: 0,
-    })
+    expect(machine('G21').units).to.equal('in')
+    expect(machine('G20').units).to.equal('mm')
   })
 
   it('should handle coolant', () => {
@@ -219,13 +101,7 @@ describe('lib/gcode-stateMachine', () => {
     //M1 optional program stop
     //M2 program end
     //- coolant, spindle off, absolute mode
-    //M3 turn spindle clockwise
-    //M4 turn spindle counterclockwise
-    //M5 stop spindle turning
     //M6 tool change
-    //M7 mist coolant on
-    //M8 flood coolant on
-    //M9 mist and flood coolant off
     //M30 program end, pallet shuttle, and reset
     //M48 enable speed and feed overrides
     //M49 disable speed and feed overrides
