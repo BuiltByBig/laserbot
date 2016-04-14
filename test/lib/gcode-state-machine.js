@@ -9,6 +9,7 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should change X, Y and Z', () => {
     expect(machine('G0 X5 Y10 Z15')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G0 X5 Y10 Z15',
@@ -25,6 +26,7 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should update state over time', () => {
     expect(machine('G0 X5 Y10 Z15')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G0 X5 Y10 Z15',
@@ -39,6 +41,7 @@ describe('lib/gcode-stateMachine', () => {
     })
 
     expect(machine('G0 X-10 Y5 Z-5')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G0 X5 Y10 Z15',
@@ -56,6 +59,7 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should handle spindle speed', () => {
     expect(machine('G0 X10 S150')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G0 X10 S150',
@@ -69,6 +73,7 @@ describe('lib/gcode-stateMachine', () => {
       z: 0,
     })
     expect(machine('G0 X5 S500')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G0 X10 S150',
@@ -86,6 +91,7 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should handle spindle on/off and direction', () => {
     expect(machine('M3')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'M3',
@@ -99,6 +105,7 @@ describe('lib/gcode-stateMachine', () => {
       z: 0,
     })
     expect(machine('M5')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'M3',
@@ -116,6 +123,7 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should accept a passed in state object', () => {
     const initialState = {
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'M3',
@@ -146,6 +154,7 @@ describe('lib/gcode-stateMachine', () => {
     machine('G90')
     machine('G0 X10 Y10 Z10')
     expect(machine('G0 X5 Y5 Z5')).to.deep.equal({
+      coolant: false,
       distanceMode: 'absolute',
       history: [
         'G90',
@@ -164,6 +173,7 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should handle setting units', () => {
     expect(machine('G21')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G21',
@@ -177,6 +187,7 @@ describe('lib/gcode-stateMachine', () => {
       z: 0,
     })
     expect(machine('G20')).to.deep.equal({
+      coolant: false,
       distanceMode: 'relative',
       history: [
         'G21',
@@ -192,8 +203,10 @@ describe('lib/gcode-stateMachine', () => {
     })
   })
 
-  xit('should handle coolant', () => {
-   // M7,8,9
+  it('should handle coolant', () => {
+    expect(machine('M7').coolant).to.equal('mist')
+    expect(machine('M8').coolant).to.equal('flood')
+    expect(machine('M9').coolant).to.be.false
   })
 
   xit('should handle tool changes', () => {

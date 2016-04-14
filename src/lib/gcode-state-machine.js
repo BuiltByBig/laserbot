@@ -9,6 +9,7 @@ import parser from './parse-gcode'
 export default () => {
 
   let state = {
+    coolant: false, // or 'mist' or 'flood'
     distanceMode: 'relative', // or 'absolute'
     history: [],
     spindleDirection: 'clockwise', // or 'counter'
@@ -56,6 +57,12 @@ export default () => {
             state.spindleDirection = arg === 3 ? 'clockwise' : 'counter'
           } else if (arg === 5) {
             state.spindleEnabled = false
+          } else if (arg === 7) {
+            state.coolant = 'mist'
+          } else if (arg === 8) {
+            state.coolant = 'flood'
+          } else if (arg === 9) {
+            state.coolant = false
           }
           break
         case 'S':
