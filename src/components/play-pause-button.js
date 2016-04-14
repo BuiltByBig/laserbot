@@ -12,6 +12,7 @@ export default React.createClass({
     killAlarm: PropTypes.func.isRequired,
     pause: PropTypes.func.isRequired,
     play: PropTypes.func.isRequired,
+    reset: PropTypes.func.isRequired,
     status: PropTypes.oneOf([
       'alarm',
       'check',
@@ -47,6 +48,7 @@ export default React.createClass({
       killAlarm,
       pause,
       play,
+      reset,
       status,
       stop,
     } = this.props
@@ -82,9 +84,8 @@ export default React.createClass({
       icon = 'bell-o'
       label = 'Reset Alarm'
     } else if (status === 'error') {
-      action = killAlarm
+      action = reset
       className += ' btn-danger'
-      enabled = false
       icon = 'exclamation-triangle'
       label = 'Restart Machine'
     } else if (status === 'door') {

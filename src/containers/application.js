@@ -42,7 +42,7 @@ export default React.createClass({
       startupBlocks: [
         //'$$ ; get grbl settings', // set relative coordinate system
       ],
-      status: 'idle',
+      status: 'error',
       stripOkStatusMessages: true,
       supportedFileExtensions: [
         '.gcode',
@@ -278,7 +278,8 @@ export default React.createClass({
     })
   },
 
-  _disconnectFromDevice(name) {
+  _disconnectFromDevice() {
+    const name = this.state.connectedDevice.name
     this._emit('disconnect from device', null, (err) => {
       const devices = this.state.devices.map((device) => {
         if (device.name === name) {
@@ -346,6 +347,17 @@ export default React.createClass({
     this.setState({ status: 'idle' })
     await this._sendCommands([ 'M2 ~ ; stop machine and reset hold' ])
     console.log('stop success')
+  },
+
+  async _reset() {
+    console.log('reset')
+    await this._sendCommands([ '\x18 ; reset machine' ])
+    this._disconnectFromDevice()
+    //this.setState({
+      //connectedDevice: null,
+      //status: 'idle',
+    //})
+    console.log('reset success')
   },
 
   async _homeAll() {
@@ -497,6 +509,7 @@ export default React.createClass({
                 killAlarm={this._killAlarm}
                 pause={this._pause}
                 play={this._play}
+                reset={this._reset}
                 status={status}
                 stop={this._stop}
               />
