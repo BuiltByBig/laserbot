@@ -33,6 +33,7 @@ npm run watch
 - [ ] Resize, rotate, flip operations
 - [ ] Drag + drop support
 - [ ] Keyboard shortcuts:
+  - [ ] `escape` -- raise alarm
 - [ ] Change jog increment value
 - [ ] Store files in localstorage
 - [ ] Store config in localstorage
