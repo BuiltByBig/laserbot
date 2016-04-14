@@ -153,7 +153,7 @@ export default React.createClass({
     }
 
     if (msg.includes('[Reset to continue]')) {
-      this.setState({ status: 'alarm' })
+      this.setState({ status: 'error' })
     }
 
     // Strip "ok" messages if configured
