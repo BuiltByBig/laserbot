@@ -9,6 +9,8 @@ import PlayPauseButton from '../components/play-pause-button'
 import PreviewPane from '../components/preview-pane'
 import React, { PropTypes } from 'react'
 
+const MOCK_DEVICE_NAME = 'Mock grbl machine'
+
 export default React.createClass({
 
   name: 'Application',
@@ -34,10 +36,11 @@ export default React.createClass({
           type: 'danger',
         },
       ],
-      shortcutsEnabled: true,
       settingsVisible: false,
+      shortcutsEnabled: true,
+      showMocKDevice: true,
       startupBlocks: [
-        '$$ ; get grbl settings', // set relative coordinate system
+        //'$$ ; get grbl settings', // set relative coordinate system
       ],
       status: 'idle',
       stripOkStatusMessages: true,
@@ -63,7 +66,20 @@ export default React.createClass({
     this.socket.on('serial connect', this._onSerialConnect)
     this.socket.on('serial disconnect', this._onSerialDisconnect)
     this.socket.on('serial error', this._onSerialError)
-    this.socket.on('available ports', this._onAvailablePorts)
+    this.socket.on('available devices', this._onAvailableDevices)
+  },
+
+  _emit(msg, data, cb) {
+
+    // Dont emit events when connected to the mock device.
+    const connDevice = this.state.connectedDevice
+    const mockName = MOCK_DEVICE_NAME
+    if ((msg === 'connect to device' && data === mockName) ||
+        (connDevice && connDevice.name === mockName)) {
+      return cb(null, null)
+    }
+
+    this.socket.emit(msg, data, cb)
   },
 
   _onConnect() {
@@ -76,25 +92,41 @@ export default React.createClass({
     this.setState({ connectedToWebsockets: false })
   },
 
-  _onAvailablePorts(ports) {
-    console.log('onAvailablePorts', ports)
-    const devices = ports.map((port) => {
+  _onAvailableDevices(availableDevices) {
+    console.log('onAvailableDevices', availableDevices)
+    const devices = availableDevices.map((device) => {
       return {
-        name: port.comName,
+        name: device.comName,
         open: false,
       }
     })
+
+    if (this.state.showMocKDevice) {
+      devices.push({
+        name: MOCK_DEVICE_NAME,
+        open: false,
+      })
+    }
+
     this.setState({ devices })
   },
 
   _onSerialConnect() {
     console.log('serial connect')
-    this.setState({ connectedToDevice: true })
+    this.setState({
+      connectedToDevice: true,
+    })
+
+    this._updateMachineConfig()
   },
 
   _onSerialDisconnect() {
     console.log('serial disconnect')
-    this.setState({ connectedToDevice: false })
+    this.state.connectedDevice.open = false
+    this.setState({
+      connectedToDevice: false,
+      connectedDevice: null,
+    })
   },
 
   _onSerialError(err) {
@@ -104,6 +136,12 @@ export default React.createClass({
       message: err,
     })
     this.setState(this.state)
+  },
+
+  _updateMachineConfig() {
+    this._emit('get config', null, (err, config) => {
+      console.log('config', config)
+    })
   },
 
   async _onResponse(msg) {
@@ -144,7 +182,8 @@ export default React.createClass({
   // Promisify? could prevent buffer overflow/blocking...
   _sendCommand(cmd, cb) {
     console.log('send command', cmd)
-    this.socket.emit('send command', cmd, (err, data) => {
+
+    this._emit('send command', cmd, (err, data) => {
       if (err) {
         console.error(`error sending command ${cmd}:`, err)
         cb && cb(new Error(`error sending command ${cmd}: ${err.message}`), null)
@@ -219,7 +258,7 @@ export default React.createClass({
   },
 
   _connectToDevice(name) {
-    this.socket.emit('connect to device', name, (err) => {
+    this._emit('connect to device', name, (err) => {
       console.log('connected to device', name)
       let connectedDevice
       const devices = this.state.devices.map((device) => {
@@ -240,7 +279,7 @@ export default React.createClass({
   },
 
   _disconnectFromDevice(name) {
-    this.socket.emit('disconnect from device', () => {
+    this._emit('disconnect from device', null, (err) => {
       const devices = this.state.devices.map((device) => {
         if (device.name === name) {
           device.open = false
@@ -255,7 +294,6 @@ export default React.createClass({
       })
     })
   },
-
 
   _removeFile(index) {
     this.state.files.splice(index, 1)
