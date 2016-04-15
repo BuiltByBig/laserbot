@@ -108,7 +108,7 @@ export default React.createClass({
     const mockName = MOCK_DEVICE_NAME
     if ((msg === 'connect to device' && data === mockName) ||
         (connDevice && connDevice.name === mockName)) {
-      const timeout = Math.floor(Math.random() * 100) + 10
+      const timeout = Math.floor(Math.random() * 30) + 5
       console.log('timeout', timeout)
       return setTimeout(cb, timeout)
     }
