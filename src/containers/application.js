@@ -48,10 +48,10 @@ export default React.createClass({
         y: 0,
       },
       notifications: [
-        {
-          message: 'Here is a notification...',
-          type: 'danger',
-        },
+        //{
+          //message: 'Here is a notification...',
+          //type: 'danger',
+        //},
       ],
       settingsVisible: false,
       shortcutsEnabled: true,
