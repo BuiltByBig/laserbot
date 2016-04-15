@@ -30,7 +30,12 @@ export default React.createClass({
 
     const enableActions = connectedToDevice && status === 'idle'
 
-    const powerDisplay = power ? `${(power / 10)}% Power` : '...'
+    let powerDisplay
+    if (power) {
+      powerDisplay = `${(power / 10)}% Power`
+    } else {
+      powerDisplay = enabled ? 'On' : 'Off'
+    }
 
     return (
       <div className='center-block'>
