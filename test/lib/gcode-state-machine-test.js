@@ -37,6 +37,13 @@ describe('lib/gcode-stateMachine', () => {
     expect(machine('G0 X-10', initialState)).to.deep.equal(expected)
   })
 
+  it('should handle resetting work offsets', () => {
+    machine('G0 X5 Y10 Z15')
+    expect(machine('G92 X0').x).to.equal(0)
+    expect(machine('G92 Y0').y).to.equal(0)
+    expect(machine('G92 Z0').z).to.equal(0)
+  })
+
   it('should handle an array of commands', () => {
     const state = machine([
       'G0 X5',
@@ -82,6 +89,7 @@ describe('lib/gcode-stateMachine', () => {
   it('should handle spindle on/off and direction', () => {
     expect(machine('M3').spindleEnabled).to.be.true
     expect(machine('M5').spindleEnabled).to.be.false
+    expect(machine('M4').spindleEnabled).to.be.true
   })
 
   it('should handle spindle direction', () => {

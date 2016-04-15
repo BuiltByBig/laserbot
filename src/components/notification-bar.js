@@ -1,3 +1,4 @@
+import FA from 'react-fontawesome'
 import React, { PropTypes } from 'react'
 
 export default React.createClass({
@@ -38,6 +39,7 @@ export default React.createClass({
             >
               <span>&times;</span>
             </button>
+            <FA name='exclamation-triangle' className='p-r-1' />
             <strong>
               {notification.message}
             </strong>

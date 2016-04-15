@@ -42,20 +42,24 @@ export default () => {
 
       const parsed = parser(command)
 
+      let resetOffset = false
+
       // Parse each word and update the state accordingly
       parsed.words.forEach((word) => {
         const [ letter, arg ] = word
 
         switch (letter) {
           case 'G':
-            if (arg === 90) {
-              state.distanceMode = 'absolute'
-            } else if (arg === 91) {
-              state.distanceMode = 'relative'
-            } else if (arg === 20) {
+            if (arg === 20) {
               state.units = 'mm'
             } else if (arg === 21) {
               state.units = 'in'
+            } else if (arg === 90) {
+              state.distanceMode = 'absolute'
+            } else if (arg === 91) {
+              state.distanceMode = 'relative'
+            } else if (arg === 92) {
+              resetOffset = true
             }
             break
           case 'M':
@@ -79,24 +83,24 @@ export default () => {
             state.spindleSpeed = arg
             break
           case 'X':
-            if (state.distanceMode === 'relative') {
-              state.x += arg
-            } else {
+            if (resetOffset || state.distanceMode === 'absolute') {
               state.x = arg
+            } else {
+              state.x += arg
             }
             break
           case 'Y':
-            if (state.distanceMode === 'relative') {
-              state.y += arg
-            } else {
+            if (resetOffset || state.distanceMode === 'absolute') {
               state.y = arg
+            } else {
+              state.y += arg
             }
             break
           case 'Z':
-            if (state.distanceMode === 'relative') {
-              state.z += arg
-            } else {
+            if (resetOffset || state.distanceMode === 'absolute') {
               state.z = arg
+            } else {
+              state.z += arg
             }
             break
           default:

@@ -1,15 +1,24 @@
-import FileInput from '../components/file-input'
-import FileList from '../components/file-list'
-import JoggingControl from '../components/jogging-control'
+import FileInput from '~/components/file-input'
+import FileList from '~/components/file-list'
+import JoggingControl from '~/components/jogging-control'
+import Immutable from 'immutable'
 import io from 'socket.io-client'
-import MachineCoordinates from '../components/machine-coordinates'
-import Navigation from '../components/navigation'
+import LaserStatus from '~/components/laser-status'
+import MachineCoordinates from '~/components/machine-coordinates'
+import Navigation from '~/components/navigation'
 import parser from '~/lib/parse-gcode'
-import PlayPauseButton from '../components/play-pause-button'
-import PreviewPane from '../components/preview-pane'
+import PlayPauseButton from '~/components/play-pause-button'
+import PreviewPane from '~/components/preview-pane'
 import React, { PropTypes } from 'react'
+import stateMachine from '~/lib/gcode-state-machine'
+import queue from 'queue'
 
 const MOCK_DEVICE_NAME = 'Mock grbl machine'
+
+const Command = Immutable.Record({
+  content: '',
+  type: '',
+})
 
 export default React.createClass({
 
@@ -17,19 +26,27 @@ export default React.createClass({
 
   getInitialState() {
     return {
+      config: {
+        grbl: {
+          '$100': 250,
+          '$101': 250,
+          '$110': 500,
+          '$111': 500,
+        },
+      },
       connectedDevice: null,
       connectedToWebsockets: false,
-      commands: [],
+      commands: Immutable.List(),
       devices: [],
       //enableZ: false, // TODO: allow showing Z if desired
       files: [],
-      grblConfig: {
-        '$100': 250,
-        '$101': 250,
-        '$110': 500,
-        '$111': 500,
-      },
       jogDistance: 1,
+      machine: {
+        laserEnabled: false,
+        laserPower: null,
+        x: 0,
+        y: 0,
+      },
       notifications: [
         {
           message: 'Here is a notification...',
@@ -40,9 +57,9 @@ export default React.createClass({
       shortcutsEnabled: true,
       showMocKDevice: true,
       startupBlocks: [
-        //'$$ ; get grbl settings', // set relative coordinate system
+        //'$$  get grbl settings', // set relative coordinate system
       ],
-      status: 'error',
+      status: 'idle',
       stripOkStatusMessages: true,
       supportedFileExtensions: [
         '.gcode',
@@ -53,8 +70,6 @@ export default React.createClass({
         '.svg',
         '.txt',
       ],
-      x: 0,
-      y: 0,
     }
   },
 
@@ -67,6 +82,23 @@ export default React.createClass({
     this.socket.on('serial disconnect', this._onSerialDisconnect)
     this.socket.on('serial error', this._onSerialError)
     this.socket.on('available devices', this._onAvailableDevices)
+
+    // Gcode state machine
+    this.gcodeMachine = stateMachine()
+
+    // Gcode queue
+    this.q = queue()
+    this.q.concurrency = 1
+
+    //this.q.timeout = 1000
+    //this.q.on('timeout', (next, job) => {
+      //console.log('job timed out:', job.toString().replace(/\n/g, ''))
+      //next()
+    //})
+
+    //this.q.on('success', (result, job) => {
+      //console.log('job finished processing:', job.toString().replace(/\n/g, ''))
+    //})
   },
 
   _emit(msg, data, cb) {
@@ -76,7 +108,9 @@ export default React.createClass({
     const mockName = MOCK_DEVICE_NAME
     if ((msg === 'connect to device' && data === mockName) ||
         (connDevice && connDevice.name === mockName)) {
-      return cb(null, null)
+      const timeout = Math.floor(Math.random() * 100) + 10
+      console.log('timeout', timeout)
+      return setTimeout(cb, timeout)
     }
 
     this.socket.emit(msg, data, cb)
@@ -144,7 +178,7 @@ export default React.createClass({
     })
   },
 
-  async _onResponse(msg) {
+  _onResponse(msg) {
     console.log('onResponse', msg)
 
     if (!msg) {
@@ -165,67 +199,79 @@ export default React.createClass({
     const startupBlocks = this.state.startupBlocks
     if (startupBlocks.length && msg.startsWith('Grbl')) {
       console.log('sending startup blocks', startupBlocks)
-      await this._sendCommands(startupBlocks)
+      this._queueCommands(startupBlocks)
     }
 
     this._logCommand('system', msg)
   },
 
-  _parseCommand(cmd) {
-    console.log('parsing command', cmd)
-    console.log(parser(cmd))
-    //gcode.parseString(cmd, (err, result) => {
-      //console.log('result', JSON.stringify(result));
-    //})
-  },
+  _queueCommands(cmds) {
 
-  // Promisify? could prevent buffer overflow/blocking...
-  _sendCommand(cmd, cb) {
-    console.log('send command', cmd)
+    console.log('queue commands', cmds)
 
-    this._emit('send command', cmd, (err, data) => {
-      if (err) {
-        console.error(`error sending command ${cmd}:`, err)
-        cb && cb(new Error(`error sending command ${cmd}: ${err.message}`), null)
-        return
-      }
-      this._logCommand('user', cmd)
-      cb && cb(null, data)
-    })
-  },
+    if (!this.state.connectedDevice) {
+      console.log('no device, cannot send commands', cmds)
+      return
+    }
 
-  async _sendCommands(cmds) {
-    console.log('send commands:', cmds)
     for (let cmd of cmds) {
+
+      console.log('send command', cmd)
 
       // Skip empty commands.
       if (!cmd) {
         continue
       }
 
-      this._parseCommand(cmd)
+      this.q.push(function (cb) {
+        this._emit('send command', cmd, (err, data) => {
 
-      console.log('cmd', cmd)
-      await new Promise((resolve, reject) => {
-        this._sendCommand(cmd, (err, data) => {
           if (err) {
-            return reject(err)
+            console.error(`error sending command ${cmd}:`, err)
+            throw new Error(`error sending command ${cmd}: ${err.message}`)
           }
-          resolve(data)
+
+          console.log('command received', cmd)
+
+
+          const {
+            spindleEnabled,
+            spindleSpeed,
+            //stopped,
+            //units,
+            x,
+            y,
+          } = this.gcodeMachine(cmd)
+          this.state.machine.laserEnabled = spindleEnabled
+          this.state.machine.laserPower = spindleSpeed
+          this.state.machine.x = x
+          this.state.machine.y = y
+          this.setState(this.state)
+
+          this._logCommand('user', cmd)
+
+          cb()
         })
-      })
+      }.bind(this))
+
+
+      console.log('command sent', cmd)
     }
+
+    this.q.start((err) => {
+      console.log('queue done!')
+    })
   },
 
   _logCommand(type, content) {
+
     // TODO: show what commands have been received or are pending
-    this.state.commands.push({
-      content,
-      type,
-    })
-    this.setState({
-      commands: this.state.commands,
-    })
+
+    this.state.commands = this.state.commands.push(
+      new Command({ type, content })
+    )
+
+    this.setState(this.state)
   },
 
   _handleFileUpload(event) {
@@ -290,7 +336,7 @@ export default React.createClass({
 
       this.setState({
         connectedDevice: null,
-        commands: [],
+        commands: Immutable.List(),
         devices,
       })
     })
@@ -301,17 +347,22 @@ export default React.createClass({
     this.setState(this.state)
   },
 
-  async _loadFile(index) {
-    const file = this.state.files[index]
+  _loadFile(index) {
     console.log('load file', index)
+
+    const file = this.state.files[index]
+
     console.log(file)
+
     const lines = file.content.split('\n')
 
     this.setState({ status: 'run' })
 
+    // TODO Handle state more elegantly somehow
+
     // Run serially so the buffer doesn't overflow on
     // grbl
-    await this._sendCommands(lines)
+    this._queueCommands(lines)
 
     this.setState({ status: 'idle' })
   },
@@ -321,111 +372,105 @@ export default React.createClass({
     this.setState(this.state)
   },
 
-  async _killAlarm() {
+  _killAlarm() {
     console.log('killAlarm')
     this.setState({ status: 'idle' })
-    await this._sendCommands([ '$X ; kill alarm' ])
-    console.log('killAlarm received')
+    this._queueCommands([ '$X  kill alarm' ])
   },
 
-  async _pause() {
+  _pause() {
     console.log('pause')
     this.setState({ status: 'hold' })
-    await this._sendCommands([ '! ; feed hold' ])
-    console.log('pause received')
+    this._queueCommands([ '!  feed hold' ])
   },
 
-  async _play() {
+  _play() {
     console.log('play')
     this.setState({ status: 'run' })
-    await this._sendCommands([ '~ ; cycle start' ])
-    console.log('play success')
+    this._queueCommands([ '~  cycle start' ])
   },
 
-  async _stop() {
+  _stop() {
     console.log('stop')
     this.setState({ status: 'idle' })
-    await this._sendCommands([ 'M2 ~ ; stop machine and reset hold' ])
-    console.log('stop success')
+    this._queueCommands([ 'M2 ~  stop machine and reset hold' ])
   },
 
-  async _reset() {
+  _reset() {
     console.log('reset')
-    await this._sendCommands([ '\x18 ; reset machine' ])
+    this._queueCommands([ '\x18  reset machine' ])
     this._disconnectFromDevice()
-    //this.setState({
-      //connectedDevice: null,
-      //status: 'idle',
-    //})
-    console.log('reset success')
   },
 
-  async _homeAll() {
+  _homeAll() {
     console.log('homeAll')
     // $H if home switches are enabled, otherwise 'G91 G0 X0 Y0 Z0'
-    await this._sendCommands([ 'G90 G0 X0 Y0 Z0' ])
-    console.log('homeAll success')
-    this.setState({ x: 0, y: 0 })
+    this._queueCommands([ 'G90 G0 X0 Y0 Z0' ])
   },
 
-  async _homeX() {
+  _homeX() {
     console.log('homeX')
-    await this._sendCommands([ 'G90 G0 X0' ])
-    console.log('homeX success')
-    this.setState({ x: 0 })
+    this._queueCommands([ 'G90 G0 X0' ])
   },
 
-  async _homeY() {
+  _homeY() {
     console.log('homeY')
-    await this._sendCommands([ 'G90 G0 Y0' ])
-    console.log('homeY success')
-    this.setState({ y: 0 })
+    this._queueCommands([ 'G90 G0 Y0' ])
   },
 
-  async _jogXNegative() {
+  _jogXNegative() {
     console.log('jogXNegative')
-    await this._sendCommands([ `G91 G0 X-${this.state.jogDistance}` ])
-    console.log('jogXNegative success')
-    this.setState({ x: this.state.x - this.state.jogDistance })
+    this._queueCommands([ `G91 G0 X-${this.state.jogDistance}` ])
   },
 
-  async _jogXPositive() {
+  _jogXPositive() {
     console.log('jogXPositive')
-    await this._sendCommands([ `G91 G0 X${this.state.jogDistance}` ])
-    console.log('jogXPositive success')
-    this.setState({ x: this.state.x + this.state.jogDistance })
+    this._queueCommands([ `G91 G0 X${this.state.jogDistance}` ])
   },
 
-  async _jogYNegative() {
+  _jogYNegative() {
     console.log('jogYNegative')
-    await this._sendCommands([ `G91 G0 Y-${this.state.jogDistance}` ])
-    console.log('jogYNegative success')
-    this.setState({ y: this.state.y - this.state.jogDistance })
+    this._queueCommands([ `G91 G0 Y-${this.state.jogDistance}` ])
+    //this.setState({ y: this.state.y - this.state.jogDistance })
   },
 
-  async _jogYPositive() {
+  _jogYPositive() {
     console.log('jogYPositive')
-    await this._sendCommands([ `G91 G0 Y${this.state.jogDistance}` ])
-    console.log('jogYPositive success')
-    this.setState({ y: this.state.y + this.state.jogDistance })
+    this._queueCommands([ `G91 G0 Y${this.state.jogDistance}` ])
+    //this.setState({ y: this.state.y + this.state.jogDistance })
   },
 
-  async _zeroX() {
+  _zeroX() {
     console.log('zeroX')
-    this.setState({ x: 0 })
-    await this._sendCommands([ 'G92 X0' ])
+    this._queueCommands([ 'G92 X0' ])
   },
 
-  async _zeroY() {
+  _enableLaser() {
+    console.log('enableLaser')
+    this._queueCommands([ 'M3' ])
+  },
+
+  _disableLaser() {
+    console.log('disableLaser')
+    this._queueCommands([ 'M5' ])
+  },
+
+  _zeroY() {
     console.log('zeroY')
-    this.setState({ y: 0 })
-    await this._sendCommands([ 'G92 Y0' ])
+    this._queueCommands([ 'G92 Y0' ])
   },
 
-  async _updateConfig(config) {
+  _zeroY() {
+    console.log('zeroY')
+    this._queueCommands([ 'G92 Y0' ])
+  },
+
+  _updateConfig(config) {
     const cmds = _.map(config, (val, key) => `${key}=${Number(val)}`)
-    await this._sendCommands(cmds)
-    this.setState({ grblConfig: config })
+    this._queueCommands(cmds)
+    console.log('config', this.state.config)
+    this.state.config.grbl = config
+    this.setState(this.state)
   },
 
   _hideSettings() {
@@ -443,15 +488,13 @@ export default React.createClass({
       connectedToWebsockets,
       devices,
       files,
-      grblConfig,
+      config,
+      machine,
       notifications,
       shortcutsEnabled,
       settingsVisible,
       status,
       supportedFileExtensions,
-      x,
-      y,
-      z,
     } = this.state
 
     const connectedToDevice = Boolean(connectedDevice)
@@ -496,8 +539,8 @@ export default React.createClass({
               disconnectFromDevice={this._disconnectFromDevice}
               hideSettings={this._hideSettings}
               fetchDevices={this._fetchDevices}
-              machineConfig={grblConfig}
-              sendCommands={this._sendCommands}
+              machineConfig={config.grbl}
+              sendCommands={this._queueCommands}
               settingsVisible={settingsVisible}
               updateConfig={this._updateConfig}
             />
@@ -526,17 +569,27 @@ export default React.createClass({
                 status={status}
               />
             </div>
-            <div className='m-b-2'>
+            <div className='m-b-3'>
               <MachineCoordinates
                 connectedToDevice={connectedToDevice}
                 displayUnits='mm'
                 homeX={this._homeX}
                 homeY={this._homeY}
                 status={status}
-                x={x}
-                y={y}
+                x={machine.x}
+                y={machine.y}
                 zeroX={this._zeroX}
                 zeroY={this._zeroY}
+              />
+            </div>
+            <div className='m-b-2'>
+              <LaserStatus
+                connectedToDevice={connectedToDevice}
+                disableLaser={this._disableLaser}
+                enabled={machine.laserEnabled}
+                enableLaser={this._enableLaser}
+                power={machine.laserPower}
+                status={status}
               />
             </div>
           </div>

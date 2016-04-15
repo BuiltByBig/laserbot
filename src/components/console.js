@@ -1,6 +1,5 @@
-import capitalize from 'capitalize'
 import Card from './card'
-import FA from 'react-fontawesome'
+import ConsoleList from './console-list'
 import React from 'react'
 import '../styles/console.scss'
 
@@ -47,27 +46,12 @@ export default React.createClass({
   render() {
 
     let commands
-    if (this.props.commands.length) {
-      const list = this.props.commands.map((command, index) => {
-        const icon = command.type === 'user' ? 'user' : 'desktop'
-        return (
-          <li
-            className={`${command.type}-command`}
-            key={index}
-          >
-            <FA
-              className='p-r-3'
-              fixedWidth
-              name={icon}
-              title={`${capitalize(command.type)} command`}
-            />
-            {command.content}
-          </li>
-        )
-      })
+    if (this.props.commands.size) {
 
       commands = (
-        <ul className='timeline list-unstyled m-b-0'>{list}</ul>
+        <ConsoleList
+          commands={this.props.commands}
+        />
       )
     } else {
       commands = (

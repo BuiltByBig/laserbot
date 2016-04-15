@@ -73,13 +73,15 @@ export default React.createClass({
 
     const enabled = connectedToDevice && status === 'idle'
 
+    const nonop = () => console.warn('command not enabled when disconnected!')
+
     return (
       <div className='jogging-control'>
         <div className='jog-y-positive'>
           <button
             className='btn btn-lg btn-secondary'
             disabled={!enabled}
-            onClick={jogYPositive}
+            onClick={enabled ? jogYPositive : nonop}
           >
             <FA
               name='chevron-up'
@@ -91,7 +93,7 @@ export default React.createClass({
           <button
             className='btn btn-lg btn-secondary'
             disabled={!enabled}
-            onClick={jogXNegative}
+            onClick={enabled ? jogXNegative : nonop}
           >
             <FA
               name='chevron-left'
@@ -101,7 +103,7 @@ export default React.createClass({
           <button
             className='btn btn-lg btn-secondary'
             disabled={!enabled}
-            onClick={homeAll}
+            onClick={enabled ? homeAll : nonop}
           >
             <FA
               name='home'
@@ -111,7 +113,7 @@ export default React.createClass({
           <button
             className='btn btn-lg btn-secondary'
             disabled={!enabled}
-            onClick={jogXPositive}
+            onClick={enabled ? jogXPositive : nonop}
           >
             <FA
               name='chevron-right'
@@ -123,7 +125,7 @@ export default React.createClass({
           <button
             className='btn btn-lg btn-secondary'
             disabled={!enabled}
-            onClick={jogYNegative}
+            onClick={enabled ? jogYNegative : nonop}
           >
             <FA
               name='chevron-down'

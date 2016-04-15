@@ -1,0 +1,44 @@
+.inline-field {
+  display: flex;
+
+  .inline-field-label {
+    align-items: center;
+    background: white;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    min-width: 3rem;
+    padding: 0 1rem;
+    text-align: center;
+
+    div {
+      font-weight: bold;
+      flex: 1;
+      /*line-height: 1;*/
+    }
+  }
+
+  .inline-field-input {
+    align-items: 'stretch';
+    background: white;
+    display: flex;
+    flex: 1;
+
+    input {
+      border: 0 none;
+      flex: 1;
+      font-size: 1.2rem;
+    }
+  }
+
+  .inline-field-actions {
+    align-items: 'stretch';
+    background: white;
+    display: flex;
+
+    button {
+      border: 0 none;
+      flex: 1;
+    }
+  }
+}

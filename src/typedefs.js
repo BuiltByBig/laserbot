@@ -6,3 +6,14 @@ export const Device = PropTypes.shape({
   name: PropTypes.string,
   open: PropTypes.bool,
 })
+
+export const StatusType = PropTypes.oneOf([
+  'alarm',
+  'check',
+  'door',
+  'error',
+  'hold',
+  'home',
+  'idle',
+  'run',
+])
