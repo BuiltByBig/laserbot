@@ -37,6 +37,24 @@ describe('lib/gcode-stateMachine', () => {
     expect(machine('G0 X-10', initialState)).to.deep.equal(expected)
   })
 
+  it('should handle an array of commands', () => {
+    const state = machine([
+      'G0 X5',
+      'G0 Y10',
+    ])
+    expect(state.x).to.equal(5)
+    expect(state.y).to.equal(10)
+  })
+
+  it('should work with lowercase command letters', () => {
+    const state = machine([
+      'g0 x5',
+      'g0 y10',
+    ])
+    expect(state.x).to.equal(5)
+    expect(state.y).to.equal(10)
+  })
+
   it('should change X, Y and Z', () => {
     const state = machine('G0 X5 Y10 Z15')
     expect(state.x).to.equal(5)
@@ -94,7 +112,6 @@ describe('lib/gcode-stateMachine', () => {
 
   it('should handle program start/stop', () => {
     expect(machine('M0').stopped).to.be.true
-    //- pause temporarily
     //M1 optional program stop
     //M2 program end
     //- coolant, spindle off, absolute mode

@@ -29,7 +29,13 @@ describe('lib/gcode-parser', () => {
     })
   })
 
-  xit('should uppercase commands', () => {
-
+  it('should uppercase commands', () => {
+    expect(parser('g0 x10')).to.deep.equal({
+      number: null,
+      words: [
+        [ 'G', 0 ],
+        [ 'X', 10 ],
+      ]
+    })
   })
 })

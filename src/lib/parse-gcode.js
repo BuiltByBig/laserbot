@@ -7,7 +7,7 @@
 export default (command) => {
 
   // Remove leading and trailing whitespace
-  let cmd = command.trim()
+  let cmd = command.trim().toUpperCase()
 
   let response = {
     number: null,
